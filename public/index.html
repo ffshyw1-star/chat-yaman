@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شات اليمن المطور</title>
+<style>
+:root{--green:#075e54;--blue:#2196F3;--pink:#E91E63;--gray:#9E9E9E;--dark:#2a2a2a}
+*{box-sizing:border-box;font-family:tahoma;margin:0;padding:0}
+body{background:#e5ddd5;height:100vh;overflow:hidden}
+
+/* الصفحة الرئيسية */
+.main-menu{display:flex;justify-content:center;align-items:center;height:100%;gap:20px;flex-wrap:wrap;background:linear-gradient(135deg,#075e54,#128c7e)}
+.menu-btn{background:#fff;color:var(--green);border:none;padding:20px 40px;font-size:18px;font-weight:bold;border-radius:15px;cursor:pointer;transition:0.3s}
+.menu-btn:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+
+/* النوافذ المنبثقة */
+.popup{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:999}
+.popup.show{display:flex}
+.popup-box{background:#fff;padding:30px;border-radius:15px;width:90%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+.popup-box h3{margin-bottom:20px;color:var(--green)}
+.popup-close{float:left;cursor:pointer;font-size:24px;color:#999}
+
+.input-group{display:flex;gap:10px;align-items:center;margin:12px 0}
+.input-group input{flex:1;padding:10px;border:1px solid #ddd;border-radius:8px}
+
+.gender-dropdown{position:relative;flex-shrink:0}
+.gender-btn{padding:10px 15px;border:1px solid #ddd;border-radius:8px;cursor:pointer;background:#fff;min-width:80px;text-align:center}
+.gender-btn:hover{background:#f5f5f5}
+.gender-options{position:absolute;top:100%;left:0;background:#fff;border:1px solid #ddd;border-radius:8px;display:none;z-index:100;width:100%;min-width:120px}
+.gender-options.show{display:block}
+.gender-option{padding:10px;cursor:pointer;text-align:center}
+.gender-option:hover{background:#f5f5f5}
+
+.btn-main{background:var(--green);color:#fff;border:none;padding:12px;width:100%;border-radius:8px;cursor:pointer;margin-top:15px;font-weight:bold;transition:0.3s}
+.btn-main:hover{background:#054a41}
+
+/* الشريط العلوي */
+.topbar{height:50px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 10px;z-index:50}
+.topbar-left, .topbar-right{display:flex;gap:15px;align-items:center}
+.topbar-btn{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;transition:0.3s}
+.topbar-btn:hover{opacity:0.8;transform:scale(1.1)}
+.topbar-title{font-weight:bold;margin:0 10px}
+
+/* منطقة الشات */
+#chatArea{display:none;height:100vh;flex-direction:column;background:#e5ddd5}
+.chat-container{display:flex;flex:1;min-height:0}
+#messages{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:10px}
+
+/* هيكل الرسالة */
+.msg{display:flex;gap:8px;margin:5px 0}
+.msg-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;flex-shrink:0;font-size:12px}
+.msg-content-wrapper{flex:1;display:flex;flex-direction:column;gap:2px}
+.msg-header{display:flex;gap:8px;align-items:center}
+.msg-name{font-weight:bold;color:var(--green)}
+.msg-name-boxed{background:#ffeb3b;padding:2px 8px;border-radius:4px;font-size:12px}
+.msg-time{font-size:11px;color:#999}
+.msg-content{background:#fff;padding:8px 12px;border-radius:8px;word-wrap:break-word;max-width:70%}
+.msg-options{cursor:pointer;color:#999;font-size:14px}
+.msg-options:hover{color:var(--green)}
+
+.system-msg{text-align:center;color:#888;font-size:13px;margin:8px 0;font-style:italic}
+
+/* شريط الكتابة */
+.input-area{height:70px;background:#f0f0f0;display:flex;align-items:center;padding:8px 10px;gap:8px;border-top:1px solid #ddd}
+.input-area-btn{background:none;border:none;font-size:22px;cursor:pointer;transition:0.3s}
+.input-area-btn:hover{opacity:0.7}
+.input-area-input{flex:1;padding:10px 15px;border-radius:20px;border:1px solid #ddd;font-family:tahoma;font-size:14px}
+
+/* الشريط السفلي */
+.bottombar{height:50px;background:var(--dark);color:#fff;display:flex;justify-content:space-around;align-items:center;border-top:1px solid #555}
+.bottombar-btn{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;transition:0.3s;display:flex;flex-direction:column;align-items:center;gap:2px}
+.bottombar-btn:hover{opacity:0.8}
+.bottombar-btn small{font-size:10px}
+
+/* القوائم الجانبية */
+.sidebar{position:fixed;top:50px;right:-320px;width:300px;height:calc(100% - 100px);background:#fff;transition:0.3s;z-index:99;padding:15px;overflow-y:auto;box-shadow:-2px 0 8px rgba(0,0,0,0.1)}
+.sidebar.open{right:0}
+.sidebar-header{font-weight:bold;margin-bottom:15px;color:var(--green);padding-bottom:10px;border-bottom:2px solid #eee}
+.sidebar-close{cursor:pointer;float:left;font-size:24px;color:#999}
+
+.users-list .user-item{display:flex;align-items:center;gap:10px;padding:10px;cursor:pointer;border-radius:8px;transition:0.3s}
+.users-list .user-item:hover{background:#f0f0f0}
+.user-avatar{width:35px;height:35px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:bold;flex-shrink:0}
+.user-info{flex:1;min-width:0}
+.user-name{font-weight:bold;color:#333;word-break:break-word}
+.user-status{font-size:12px;color:#999}
+
+.report-box{background:#ffebee;padding:12px;margin:8px 0;border-radius:8px;border-right:4px solid #E91E63}
+.report-box-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold}
+.report-box-info{flex:1}
+.report-box-name{font-weight:bold;margin-bottom:3px}
+.report-box-reason{font-size:12px;color:#d32f2f}
+
+.hide{display:none}
+.active{display:flex}
+
+/* قائمة الغرف */
+#roomsList{display:none;flex-direction:column;padding:20px;background:linear-gradient(135deg,#075e54,#128c7e);height:100%}
+#roomsList.show{display:flex}
+#roomsList h2{text-align:center;color:#fff;margin-bottom:20px}
+.room-card{background:#fff;margin:10px 0;padding:15px;border-radius:10px;text-align:center;cursor:pointer;transition:0.3s;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
+.room-card:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
+.room-card-title{font-weight:bold;margin-bottom:5px;color:var(--green)}
+.room-card-hint{font-size:12px;color:#999}
+
+/* ملف شخصي منبثق */
+.profile-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:15px;padding:20px;z-index:101;width:90%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.3);max-height:80vh;overflow-y:auto}
+.profile-popup.hide{display:none}
+
+.profile-popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;border-bottom:2px solid #eee;padding-bottom:10px}
+.profile-popup-close{cursor:pointer;font-size:24px;color:#999}
+
+.profile-avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;margin-bottom:10px}
+.profile-name{font-weight:bold;margin-bottom:5px;color:var(--green);font-size:16px}
+.profile-info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}
+.profile-info-label{color:#999;font-size:12px}
+.profile-info-value{font-weight:bold;color:#333}
+
+.profile-buttons{display:flex;gap:10px;margin-top:15px}
+.profile-buttons button{flex:1;padding:10px;border:none;border-radius:8px;cursor:pointer;transition:0.3s;font-weight:bold}
+.profile-btn-primary{background:var(--green);color:#fff}
+.profile-btn-primary:hover{background:#054a41}
+.profile-btn-secondary{background:#ddd;color:#333}
+.profile-btn-secondary:hover{background:#ccc}
+</style>
+</head>
+<body>
+
+<!-- الصفحة الرئيسية -->
+<div class="main-menu" id="mainMenu">
+  <button class="menu-btn" onclick="openPopup('guest')">1️⃣ دخول زوار</button>
+  <button class="menu-btn" onclick="openPopup('login')">2️⃣ دخول الأعضاء</button>
+  <button class="menu-btn" onclick="openPopup('register')">3️⃣ تسجيل</button>
+</div>
+
+<!-- نافذة دخول الزوار -->
+<div class="popup" id="guestPopup">
+  <div class="popup-box">
+    <span class="popup-close" onclick="closePopup('guest')">&times;</span>
+    <h3>🤖 دخول زائر</h3>
+    <div class="input-group">
+      <input id="guestName" placeholder="اسم المستخدم" maxlength="30">
+      <div class="gender-dropdown">
+        <div class="gender-btn" id="guestGenderBtn" onclick="toggleGender('guest')">الجنس</div>
+        <div class="gender-options" id="guestGenderOptions">
+          <div class="gender-option" onclick="setGender('guest','male')" style="background:#2196F3;color:#fff">♂️ ذكر</div>
+          <div class="gender-option" onclick="setGender('guest','female')" style="background:#E91E63;color:#fff">♀️ انثى</div>
+          <div class="gender-option" onclick="setGender('guest','other')" style="background:#9E9E9E;color:#fff">⚪ آخر</div>
+        </div>
+      </div>
+    </div>
+    <button class="btn-main" onclick="guestLogin()">دخول</button>
+  </div>
+</div>
+
+<!-- نافذة دخول الأعضاء -->
+<div class="popup" id="loginPopup">
+  <div class="popup-box">
+    <span class="popup-close" onclick="closePopup('login')">&times;</span>
+    <h3>👤 دخول الأعضاء</h3>
+    <input id="loginName" placeholder="اكتب اسمك هنا" maxlength="30">
+    <input id="loginPass" type="password" placeholder="كلمة السر">
+    <button class="btn-main" onclick="memberLogin()">دخول</button>
+  </div>
+</div>
+
+<!-- نافذة التسجيل -->
+<div class="popup" id="registerPopup">
+  <div class="popup-box">
+    <span class="popup-close" onclick="closePopup('register')">&times;</span>
+    <h3>📝 انشاء حساب</h3>
+    <div class="input-group">
+      <input id="regName" placeholder="اسم العضو" maxlength="30">
+      <div class="gender-dropdown">
+        <div class="gender-btn" id="regGenderBtn" onclick="toggleGender('reg')">الجنس</div>
+        <div class="gender-options" id="regGenderOptions">
+          <div class="gender-option" onclick="setRegGender('male')" style="background:#2196F3;color:#fff">♂️ ذكر</div>
+          <div class="gender-option" onclick="setRegGender('female')" style="background:#E91E63;color:#fff">♀️ انثى</div>
+          <div class="gender-option" onclick="setRegGender('other')" style="background:#9E9E9E;color:#fff">⚪ آخر</div>
+        </div>
+      </div>
+    </div>
+    <input id="regPass" type="password" placeholder="كلمة السر">
+    <input id="regPass2" type="password" placeholder="تأكيد كلمة السر">
+    <input id="regEmail" placeholder="البريد الالكتروني - اختياري">
+    <input id="regAge" type="number" placeholder="العمر" min="1" max="150">
+    <button class="btn-main" onclick="register()">انشاء حساب</button>
+  </div>
+</div>
+
+<!-- قائمة الغرف -->
+<div id="roomsList">
+  <h2>🌍 اختر الغرفة</h2>
+  <div class="room-card" onclick="joinRoom('عام')">
+    <div class="room-card-title">🌎 غرفة العامة 🌎</div>
+    <div class="room-card-hint">اضغط هنا للدخول</div>
+  </div>
+  <div class="room-card" onclick="joinRoom('اليمن')">
+    <div class="room-card-title">🌎 غرفة اليمن 🌎</div>
+    <div class="room-card-hint">اضغط هنا للدخول</div>
+  </div>
+  <div class="room-card" onclick="joinRoom('الجزائر')">
+    <div class="room-card-title">🌎 غرفة الجزائر 🌎</div>
+    <div class="room-card-hint">اضغط هنا للدخول</div>
+  </div>
+  <div class="room-card" onclick="joinRoom('مصر')">
+    <div class="room-card-title">🌎 غرفة مصر 🌎</div>
+    <div class="room-card-hint">اضغط هنا للدخول</div>
+  </div>
+</div>
+
+<!-- منطقة الشات الكاملة -->
+<div id="chatArea">
+  <!-- الشريط العلوي -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <button class="topbar-btn" onclick="toggleSidebar('menu')" title="القائمة">☰</button>
+      <button class="topbar-btn" onclick="openStore()" title="المتجر">🛒</button>
+      <button class="topbar-btn" onclick="openPrivate()" title="الرسائل الخاصة">✉️</button>
+      <button class="topbar-btn" onclick="toggleSidebar('users')" title="المتواجدون">👥</button>
+    </div>
+    <div class="topbar-title" id="currentRoom">شات اليمن المطور</div>
+    <div class="topbar-right">
+      <button class="topbar-btn" onclick="toggleLikes()" title="الإعجابات">❤️</button>
+      <button class="topbar-btn" onclick="toggleReports()" title="البلاغات">📭</button>
+      <button class="topbar-btn" onclick="toggleProfile()" title="الملف الشخصي">👤</button>
+    </div>
+  </div>
+
+  <!-- منطقة الشات -->
+  <div class="chat-container">
+    <div id="messages"></div>
+  </div>
+
+  <!-- شريط الكتابة -->
+  <div class="input-area">
+    <button class="input-area-btn" onclick="openDrawing()" title="رسم">➕</button>
+    <button class="input-area-btn" onclick="openSmilies()" title="سمايلات">🫥</button>
+    <input type="text" class="input-area-input" id="messageInput" placeholder="اكتب هنا..." onkeypress="handleKeyPress(event)">
+    <button class="input-area-btn" onclick="recordVoice()" title="رسالة صوتية">🎤</button>
+    <button class="input-area-btn" onclick="sendMessage()" title="إرسال">➤</button>
+  </div>
+
+  <!-- الشريط السفلي -->
+  <div class="bottombar">
+    <button class="bottombar-btn" onclick="toggleSound()" title="كتم الصوت">🔊</button>
+    <button class="bottombar-btn" onclick="toggleRadio()" title="الراديو">▶️</button>
+    <button class="bottombar-btn" onclick="showRooms()" title="الغرف">🏠</button>
+    <button class="bottombar-btn" onclick="toggleSettings()" title="الإعدادات">⚙️</button>
+    <button class="bottombar-btn" onclick="toggleUsers()" title="المتواجدون">👥</button>
+  </div>
+</div>
+
+<!-- القائمة الجانبية -->
+<div class="sidebar" id="menuSidebar">
+  <span class="sidebar-close" onclick="closeSidebar('menu')">&times;</span>
+  <div class="sidebar-header">☰ القائمة الرئيسية</div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <button class="btn-main" onclick="openNews()" style="background:#2196F3">📰 الأخبار</button>
+    <button class="btn-main" onclick="openFriendWall()" style="background:#E91E63">🧱 حائط الأصدقاء</button>
+    <button class="btn-main" onclick="openStore()" style="background:#FF9800">🛒 المتجر</button>
+    <button class="btn-main" onclick="openCredit()" style="background:#4CAF50">🪙 شراء رصيد</button>
+  </div>
+</div>
+
+<!-- القائمة الجانبية للمتواجدين -->
+<div class="sidebar" id="usersSidebar">
+  <span class="sidebar-close" onclick="closeSidebar('users')">&times;</span>
+  <div class="sidebar-header">👥 المتواجدون</div>
+  <div style="display:flex;gap:5px;margin-bottom:10px">
+    <button onclick="toggleAddFriend()" style="flex:1;padding:8px;background:#4CAF50;color:#fff;border:none;border-radius:5px;cursor:pointer">➕ إضافة</button>
+    <input type="text" id="searchUser" placeholder="البحث..." style="flex:1;padding:8px;border:1px solid #ddd;border-radius:5px">
+  </div>
+  <div class="users-list" id="usersList"></div>
+</div>
+
+<script src="/js/main.js"></script>
+</body>
+</html>
