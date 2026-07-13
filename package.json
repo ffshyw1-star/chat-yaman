@@ -1,18 +1,20 @@
 {
   "name": "chat-yaman",
-  "version": "1.0.0",
-  "description": "شات اليمن المطور - تطبيق دردشة متقدم للجوال والويب",
+  "version": "2.0.0",
+  "description": "شات اليمن المطور - تطبيق دردشة متقدم مع قاعدة بيانات PostgreSQL",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
     "dev": "nodemon server/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:init": "psql -U postgres -f database/schema.sql"
   },
   "keywords": [
     "chat",
     "yemen",
     "messaging",
-    "real-time"
+    "real-time",
+    "postgresql"
   ],
   "author": "ffshyw1-star",
   "license": "MIT",
@@ -20,7 +22,11 @@
     "express": "^4.18.2",
     "socket.io": "^4.5.4",
     "cors": "^2.8.5",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "pg": "^8.10.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.20"
