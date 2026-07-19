@@ -1,280 +1,289 @@
-<!DOCTYPE html>
-<html dir="rtl" lang="ar">
+
+# إنشاء ملف index.html - صفحة الدخول الرئيسية
+index_html = '''<!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>شات اليمن المطور</title>
-<style>
-:root{--green:#075e54;--blue:#2196F3;--pink:#E91E63;--gray:#9E9E9E;--dark:#2a2a2a}
-*{box-sizing:border-box;font-family:tahoma;margin:0;padding:0}
-body{background:#e5ddd5;height:100vh;overflow:hidden}
-
-/* الصفحة الرئيسية */
-.main-menu{display:flex;justify-content:center;align-items:center;height:100%;gap:20px;flex-wrap:wrap;background:linear-gradient(135deg,#075e54,#128c7e)}
-.menu-btn{background:#fff;color:var(--green);border:none;padding:20px 40px;font-size:18px;font-weight:bold;border-radius:15px;cursor:pointer;transition:0.3s}
-.menu-btn:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
-
-/* النوافذ المنبثقة */
-.popup{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:999}
-.popup.show{display:flex}
-.popup-box{background:#fff;padding:30px;border-radius:15px;width:90%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
-.popup-box h3{margin-bottom:20px;color:var(--green)}
-.popup-close{float:left;cursor:pointer;font-size:24px;color:#999}
-
-.input-group{display:flex;gap:10px;align-items:center;margin:12px 0}
-.input-group input{flex:1;padding:10px;border:1px solid #ddd;border-radius:8px}
-
-.gender-dropdown{position:relative;flex-shrink:0}
-.gender-btn{padding:10px 15px;border:1px solid #ddd;border-radius:8px;cursor:pointer;background:#fff;min-width:80px;text-align:center}
-.gender-btn:hover{background:#f5f5f5}
-.gender-options{position:absolute;top:100%;left:0;background:#fff;border:1px solid #ddd;border-radius:8px;display:none;z-index:100;width:100%;min-width:120px}
-.gender-options.show{display:block}
-.gender-option{padding:10px;cursor:pointer;text-align:center}
-.gender-option:hover{background:#f5f5f5}
-
-.btn-main{background:var(--green);color:#fff;border:none;padding:12px;width:100%;border-radius:8px;cursor:pointer;margin-top:15px;font-weight:bold;transition:0.3s}
-.btn-main:hover{background:#054a41}
-
-/* الشريط العلوي */
-.topbar{height:50px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 10px;z-index:50}
-.topbar-left, .topbar-right{display:flex;gap:15px;align-items:center}
-.topbar-btn{background:none;border:none;color:#fff;font-size:20px;cursor:pointer;transition:0.3s}
-.topbar-btn:hover{opacity:0.8;transform:scale(1.1)}
-.topbar-title{font-weight:bold;margin:0 10px}
-
-/* منطقة الشات */
-#chatArea{display:none;height:100vh;flex-direction:column;background:#e5ddd5}
-.chat-container{display:flex;flex:1;min-height:0}
-#messages{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:10px}
-
-/* هيكل الرسالة */
-.msg{display:flex;gap:8px;margin:5px 0}
-.msg-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;flex-shrink:0;font-size:12px}
-.msg-content-wrapper{flex:1;display:flex;flex-direction:column;gap:2px}
-.msg-header{display:flex;gap:8px;align-items:center}
-.msg-name{font-weight:bold;color:var(--green)}
-.msg-name-boxed{background:#ffeb3b;padding:2px 8px;border-radius:4px;font-size:12px}
-.msg-time{font-size:11px;color:#999}
-.msg-content{background:#fff;padding:8px 12px;border-radius:8px;word-wrap:break-word;max-width:70%}
-.msg-options{cursor:pointer;color:#999;font-size:14px}
-.msg-options:hover{color:var(--green)}
-
-.system-msg{text-align:center;color:#888;font-size:13px;margin:8px 0;font-style:italic}
-
-/* شريط الكتابة */
-.input-area{height:70px;background:#f0f0f0;display:flex;align-items:center;padding:8px 10px;gap:8px;border-top:1px solid #ddd}
-.input-area-btn{background:none;border:none;font-size:22px;cursor:pointer;transition:0.3s}
-.input-area-btn:hover{opacity:0.7}
-.input-area-input{flex:1;padding:10px 15px;border-radius:20px;border:1px solid #ddd;font-family:tahoma;font-size:14px}
-
-/* الشريط السفلي */
-.bottombar{height:50px;background:var(--dark);color:#fff;display:flex;justify-content:space-around;align-items:center;border-top:1px solid #555}
-.bottombar-btn{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;transition:0.3s;display:flex;flex-direction:column;align-items:center;gap:2px}
-.bottombar-btn:hover{opacity:0.8}
-.bottombar-btn small{font-size:10px}
-
-/* القوائم الجانبية */
-.sidebar{position:fixed;top:50px;right:-320px;width:300px;height:calc(100% - 100px);background:#fff;transition:0.3s;z-index:99;padding:15px;overflow-y:auto;box-shadow:-2px 0 8px rgba(0,0,0,0.1)}
-.sidebar.open{right:0}
-.sidebar-header{font-weight:bold;margin-bottom:15px;color:var(--green);padding-bottom:10px;border-bottom:2px solid #eee}
-.sidebar-close{cursor:pointer;float:left;font-size:24px;color:#999}
-
-.users-list .user-item{display:flex;align-items:center;gap:10px;padding:10px;cursor:pointer;border-radius:8px;transition:0.3s}
-.users-list .user-item:hover{background:#f0f0f0}
-.user-avatar{width:35px;height:35px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;font-weight:bold;flex-shrink:0}
-.user-info{flex:1;min-width:0}
-.user-name{font-weight:bold;color:#333;word-break:break-word}
-.user-status{font-size:12px;color:#999}
-
-.report-box{background:#ffebee;padding:12px;margin:8px 0;border-radius:8px;border-right:4px solid #E91E63}
-.report-box-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold}
-.report-box-info{flex:1}
-.report-box-name{font-weight:bold;margin-bottom:3px}
-.report-box-reason{font-size:12px;color:#d32f2f}
-
-.hide{display:none}
-.active{display:flex}
-
-/* قائمة الغرف */
-#roomsList{display:none;flex-direction:column;padding:20px;background:linear-gradient(135deg,#075e54,#128c7e);height:100%}
-#roomsList.show{display:flex}
-#roomsList h2{text-align:center;color:#fff;margin-bottom:20px}
-.room-card{background:#fff;margin:10px 0;padding:15px;border-radius:10px;text-align:center;cursor:pointer;transition:0.3s;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
-.room-card:hover{transform:translateY(-3px);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
-.room-card-title{font-weight:bold;margin-bottom:5px;color:var(--green)}
-.room-card-hint{font-size:12px;color:#999}
-
-/* ملف شخصي منبثق */
-.profile-popup{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:15px;padding:20px;z-index:101;width:90%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.3);max-height:80vh;overflow-y:auto}
-.profile-popup.hide{display:none}
-
-.profile-popup-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;border-bottom:2px solid #eee;padding-bottom:10px}
-.profile-popup-close{cursor:pointer;font-size:24px;color:#999}
-
-.profile-avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;margin-bottom:10px}
-.profile-name{font-weight:bold;margin-bottom:5px;color:var(--green);font-size:16px}
-.profile-info-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}
-.profile-info-label{color:#999;font-size:12px}
-.profile-info-value{font-weight:bold;color:#333}
-
-.profile-buttons{display:flex;gap:10px;margin-top:15px}
-.profile-buttons button{flex:1;padding:10px;border:none;border-radius:8px;cursor:pointer;transition:0.3s;font-weight:bold}
-.profile-btn-primary{background:var(--green);color:#fff}
-.profile-btn-primary:hover{background:#054a41}
-.profile-btn-secondary{background:#ddd;color:#333}
-.profile-btn-secondary:hover{background:#ccc}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>شات اليمن المطور 🌙</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
+    <!-- خلفية متحركة -->
+    <div class="bg-animation">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+    </div>
 
-<!-- الصفحة الرئيسية -->
-<div class="main-menu" id="mainMenu">
-  <button class="menu-btn" onclick="openPopup('guest')">1️⃣ دخول زوار</button>
-  <button class="menu-btn" onclick="openPopup('login')">2️⃣ دخول الأعضاء</button>
-  <button class="menu-btn" onclick="openPopup('register')">3️⃣ تسجيل</button>
-</div>
-
-<!-- نافذة دخول الزوار -->
-<div class="popup" id="guestPopup">
-  <div class="popup-box">
-    <span class="popup-close" onclick="closePopup('guest')">&times;</span>
-    <h3>🤖 دخول زائر</h3>
-    <div class="input-group">
-      <input id="guestName" placeholder="اسم المستخدم" maxlength="30">
-      <div class="gender-dropdown">
-        <div class="gender-btn" id="guestGenderBtn" onclick="toggleGender('guest')">الجنس</div>
-        <div class="gender-options" id="guestGenderOptions">
-          <div class="gender-option" onclick="setGender('guest','male')" style="background:#2196F3;color:#fff">♂️ ذكر</div>
-          <div class="gender-option" onclick="setGender('guest','female')" style="background:#E91E63;color:#fff">♀️ انثى</div>
-          <div class="gender-option" onclick="setGender('guest','other')" style="background:#9E9E9E;color:#fff">⚪ آخر</div>
+    <!-- الحاوية الرئيسية -->
+    <div class="main-container">
+        
+        <!-- الشعار -->
+        <div class="logo-section">
+            <div class="logo-icon">🌙</div>
+            <h1 class="logo-title">شات اليمن المطور</h1>
+            <p class="logo-subtitle">تواصل مع أصدقائك بكل سهولة وأمان</p>
+            <div class="online-counter">
+                <span class="pulse-dot"></span>
+                <span id="online-count">1,247</span> متصل الآن
+            </div>
         </div>
-      </div>
-    </div>
-    <button class="btn-main" onclick="guestLogin()">دخول</button>
-  </div>
-</div>
 
-<!-- نافذة دخول الأعضاء -->
-<div class="popup" id="loginPopup">
-  <div class="popup-box">
-    <span class="popup-close" onclick="closePopup('login')">&times;</span>
-    <h3>👤 دخول الأعضاء</h3>
-    <input id="loginName" placeholder="اكتب اسمك هنا" maxlength="30">
-    <input id="loginPass" type="password" placeholder="كلمة السر">
-    <button class="btn-main" onclick="memberLogin()">دخول</button>
-  </div>
-</div>
+        <!-- صندوق الدخول -->
+        <div class="login-box">
+            
+            <!-- أزرار التبديل -->
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="guest">
+                    <i class="fas fa-user"></i>
+                    <span>دخول زوار</span>
+                </button>
+                <button class="tab-btn" data-tab="member">
+                    <i class="fas fa-lock"></i>
+                    <span>دخول أعضاء</span>
+                </button>
+                <button class="tab-btn" data-tab="register">
+                    <i class="fas fa-user-plus"></i>
+                    <span>تسجيل جديد</span>
+                </button>
+            </div>
 
-<!-- نافذة التسجيل -->
-<div class="popup" id="registerPopup">
-  <div class="popup-box">
-    <span class="popup-close" onclick="closePopup('register')">&times;</span>
-    <h3>📝 انشاء حساب</h3>
-    <div class="input-group">
-      <input id="regName" placeholder="اسم العضو" maxlength="30">
-      <div class="gender-dropdown">
-        <div class="gender-btn" id="regGenderBtn" onclick="toggleGender('reg')">الجنس</div>
-        <div class="gender-options" id="regGenderOptions">
-          <div class="gender-option" onclick="setRegGender('male')" style="background:#2196F3;color:#fff">♂️ ذكر</div>
-          <div class="gender-option" onclick="setRegGender('female')" style="background:#E91E63;color:#fff">♀️ انثى</div>
-          <div class="gender-option" onclick="setRegGender('other')" style="background:#9E9E9E;color:#fff">⚪ آخر</div>
+            <!-- نموذج دخول الزوار -->
+            <div class="tab-content active" id="guest-tab">
+                <form id="guest-form" class="login-form">
+                    <div class="input-group">
+                        <label><i class="fas fa-user"></i> الاسم</label>
+                        <input type="text" id="guest-name" placeholder="اكتب اسمك هنا" maxlength="20" required>
+                    </div>
+                    
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label><i class="fas fa-venus-mars"></i> الجنس</label>
+                            <div class="gender-select">
+                                <button type="button" class="gender-btn" data-gender="male" data-color="blue">
+                                    <span class="gender-icon">👨</span>
+                                    <span>ذكر</span>
+                                    <div class="gender-border blue"></div>
+                                </button>
+                                <button type="button" class="gender-btn" data-gender="female" data-color="pink">
+                                    <span class="gender-icon">👩</span>
+                                    <span>أنثى</span>
+                                    <div class="gender-border pink"></div>
+                                </button>
+                                <button type="button" class="gender-btn" data-gender="other" data-color="white">
+                                    <span class="gender-icon">⚧</span>
+                                    <span>آخر</span>
+                                    <div class="gender-border white"></div>
+                                </button>
+                            </div>
+                            <input type="hidden" id="guest-gender" required>
+                        </div>
+                        
+                        <div class="input-group">
+                            <label><i class="fas fa-birthday-cake"></i> العمر</label>
+                            <div class="age-display">
+                                <input type="number" id="guest-age" value="25" min="20" max="99" readonly>
+                                <button type="button" class="random-age-btn" id="random-age">
+                                    <i class="fas fa-dice"></i> عشوائي
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn guest-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        دخول كزائر
+                    </button>
+                </form>
+            </div>
+
+            <!-- نموذج دخول الأعضاء -->
+            <div class="tab-content" id="member-tab">
+                <form id="member-form" class="login-form">
+                    <div class="input-group">
+                        <label><i class="fas fa-user-circle"></i> اسم المستخدم</label>
+                        <input type="text" id="member-username" placeholder="اسم المستخدم" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label><i class="fas fa-lock"></i> كلمة المرور</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="member-password" placeholder="••••••••" required>
+                            <button type="button" class="toggle-password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="remember">
+                            <span class="checkmark"></span>
+                            تذكرني
+                        </label>
+                        <a href="#" class="forgot-link">نسيت كلمة المرور؟</a>
+                    </div>
+
+                    <button type="submit" class="submit-btn member-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        دخول الأعضاء
+                    </button>
+                </form>
+            </div>
+
+            <!-- نموذج التسجيل -->
+            <div class="tab-content" id="register-tab">
+                <form id="register-form" class="login-form">
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label><i class="fas fa-user"></i> الاسم</label>
+                            <input type="text" id="reg-name" placeholder="الاسم الكامل" required>
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-user-tag"></i> اسم المستخدم</label>
+                            <input type="text" id="reg-username" placeholder="اسم فريد" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label><i class="fas fa-envelope"></i> البريد الإلكتروني</label>
+                        <input type="email" id="reg-email" placeholder="example@email.com">
+                        <small class="hint">يمكنك استخدام بريد وهمي</small>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label><i class="fas fa-lock"></i> كلمة المرور</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="reg-password" placeholder="••••••••" required>
+                                <button type="button" class="toggle-password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-lock"></i> تأكيد كلمة المرور</label>
+                            <input type="password" id="reg-confirm" placeholder="••••••••" required>
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label><i class="fas fa-venus-mars"></i> الجنس</label>
+                            <div class="gender-select compact">
+                                <button type="button" class="gender-btn" data-gender="male" data-color="blue">
+                                    <span>ذكر</span>
+                                    <div class="gender-border blue"></div>
+                                </button>
+                                <button type="button" class="gender-btn" data-gender="female" data-color="pink">
+                                    <span>أنثى</span>
+                                    <div class="gender-border pink"></div>
+                                </button>
+                                <button type="button" class="gender-btn" data-gender="other" data-color="white">
+                                    <span>آخر</span>
+                                    <div class="gender-border white"></div>
+                                </button>
+                            </div>
+                            <input type="hidden" id="reg-gender" required>
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-birthday-cake"></i> العمر</label>
+                            <input type="number" id="reg-age" placeholder="20-99" min="13" max="99" required>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label><i class="fas fa-globe"></i> البلد</label>
+                        <select id="reg-country" required>
+                            <option value="">اختر بلدك</option>
+                            <option value="YE" selected>🇾🇪 اليمن</option>
+                            <option value="SA">🇸🇦 السعودية</option>
+                            <option value="AE">🇦🇪 الإمارات</option>
+                            <option value="QA">🇶🇦 قطر</option>
+                            <option value="KW">🇰🇼 الكويت</option>
+                            <option value="BH">🇧🇭 البحرين</option>
+                            <option value="OM">🇴🇲 عمان</option>
+                            <option value="IQ">🇮🇶 العراق</option>
+                            <option value="JO">🇯🇴 الأردن</option>
+                            <option value="SY">🇸🇾 سوريا</option>
+                            <option value="LB">🇱🇧 لبنان</option>
+                            <option value="PS">🇵🇸 فلسطين</option>
+                            <option value="EG">🇪🇬 مصر</option>
+                            <option value="DZ">🇩🇿 الجزائر</option>
+                            <option value="MA">🇲🇦 المغرب</option>
+                            <option value="TN">🇹🇳 تونس</option>
+                            <option value="LY">🇱🇾 ليبيا</option>
+                            <option value="SD">🇸🇩 السودان</option>
+                            <option value="OTHER">🌍 دولة أخرى</option>
+                        </select>
+                    </div>
+
+                    <div class="terms-check">
+                        <label>
+                            <input type="checkbox" id="agree-terms" required>
+                            <span class="checkmark"></span>
+                            أوافق على <a href="#">شروط الاستخدام</a> و <a href="#">سياسة الخصوصية</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="submit-btn register-btn">
+                        <i class="fas fa-user-plus"></i>
+                        إنشاء حساب
+                    </button>
+                </form>
+            </div>
         </div>
-      </div>
+
+        <!-- معلومات إضافية -->
+        <div class="info-section">
+            <div class="info-card">
+                <i class="fas fa-shield-alt"></i>
+                <h3>آمن</h3>
+                <p>حماية كاملة لبياناتك</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-bolt"></i>
+                <h3>سريع</h3>
+                <p>دردشة فورية بدون تأخير</p>
+            </div>
+            <div class="info-card">
+                <i class="fas fa-mobile-alt"></i>
+                <h3>متجاوب</h3>
+                <p>يعمل على جميع الأجهزة</p>
+            </div>
+        </div>
+
+        <!-- التذييل -->
+        <footer class="main-footer">
+            <p>شات اليمن المطور © 2026 | جميع الحقوق محفوظة</p>
+            <div class="footer-links">
+                <a href="#">عن الموقع</a>
+                <a href="#">القوانين</a>
+                <a href="#">اتصل بنا</a>
+                <a href="#">المساعدة</a>
+            </div>
+        </footer>
     </div>
-    <input id="regPass" type="password" placeholder="كلمة السر">
-    <input id="regPass2" type="password" placeholder="تأكيد كلمة السر">
-    <input id="regEmail" placeholder="البريد الالكتروني - اختياري">
-    <input id="regAge" type="number" placeholder="العمر" min="1" max="150">
-    <button class="btn-main" onclick="register()">انشاء حساب</button>
-  </div>
-</div>
 
-<!-- قائمة الغرف -->
-<div id="roomsList">
-  <h2>🌍 اختر الغرفة</h2>
-  <div class="room-card" onclick="joinRoom('عام')">
-    <div class="room-card-title">🌎 غرفة العامة 🌎</div>
-    <div class="room-card-hint">اضغط هنا للدخول</div>
-  </div>
-  <div class="room-card" onclick="joinRoom('اليمن')">
-    <div class="room-card-title">🌎 غرفة اليمن 🌎</div>
-    <div class="room-card-hint">اضغط هنا للدخول</div>
-  </div>
-  <div class="room-card" onclick="joinRoom('الجزائر')">
-    <div class="room-card-title">🌎 غرفة الجزائر 🌎</div>
-    <div class="room-card-hint">اضغط هنا للدخول</div>
-  </div>
-  <div class="room-card" onclick="joinRoom('مصر')">
-    <div class="room-card-title">🌎 غرفة مصر 🌎</div>
-    <div class="room-card-hint">اضغط هنا للدخول</div>
-  </div>
-</div>
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
 
-<!-- منطقة الشات الكاملة -->
-<div id="chatArea">
-  <!-- الشريط العلوي -->
-  <div class="topbar">
-    <div class="topbar-left">
-      <button class="topbar-btn" onclick="toggleSidebar('menu')" title="القائمة">☰</button>
-      <button class="topbar-btn" onclick="openStore()" title="المتجر">🛒</button>
-      <button class="topbar-btn" onclick="openPrivate()" title="الرسائل الخاصة">✉️</button>
-      <button class="topbar-btn" onclick="toggleSidebar('users')" title="المتواجدون">👥</button>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>جاري التحميل...</p>
+        </div>
     </div>
-    <div class="topbar-title" id="currentRoom">شات اليمن المطور</div>
-    <div class="topbar-right">
-      <button class="topbar-btn" onclick="toggleLikes()" title="الإعجابات">❤️</button>
-      <button class="topbar-btn" onclick="toggleReports()" title="البلاغات">📭</button>
-      <button class="topbar-btn" onclick="toggleProfile()" title="الملف الشخصي">👤</button>
-    </div>
-  </div>
 
-  <!-- منطقة الشات -->
-  <div class="chat-container">
-    <div id="messages"></div>
-  </div>
-
-  <!-- شريط الكتابة -->
-  <div class="input-area">
-    <button class="input-area-btn" onclick="openDrawing()" title="رسم">➕</button>
-    <button class="input-area-btn" onclick="openSmilies()" title="سمايلات">🫥</button>
-    <input type="text" class="input-area-input" id="messageInput" placeholder="اكتب هنا..." onkeypress="handleKeyPress(event)">
-    <button class="input-area-btn" onclick="recordVoice()" title="رسالة صوتية">🎤</button>
-    <button class="input-area-btn" onclick="sendMessage()" title="إرسال">➤</button>
-  </div>
-
-  <!-- الشريط السفلي -->
-  <div class="bottombar">
-    <button class="bottombar-btn" onclick="toggleSound()" title="كتم الصوت">🔊</button>
-    <button class="bottombar-btn" onclick="toggleRadio()" title="الراديو">▶️</button>
-    <button class="bottombar-btn" onclick="showRooms()" title="الغرف">🏠</button>
-    <button class="bottombar-btn" onclick="toggleSettings()" title="الإعدادات">⚙️</button>
-    <button class="bottombar-btn" onclick="toggleUsers()" title="المتواجدون">👥</button>
-  </div>
-</div>
-
-<!-- القائمة الجانبية -->
-<div class="sidebar" id="menuSidebar">
-  <span class="sidebar-close" onclick="closeSidebar('menu')">&times;</span>
-  <div class="sidebar-header">☰ القائمة الرئيسية</div>
-  <div style="display:flex;flex-direction:column;gap:10px">
-    <button class="btn-main" onclick="openNews()" style="background:#2196F3">📰 الأخبار</button>
-    <button class="btn-main" onclick="openFriendWall()" style="background:#E91E63">🧱 حائط الأصدقاء</button>
-    <button class="btn-main" onclick="openStore()" style="background:#FF9800">🛒 المتجر</button>
-    <button class="btn-main" onclick="openCredit()" style="background:#4CAF50">🪙 شراء رصيد</button>
-  </div>
-</div>
-
-<!-- القائمة الجانبية للمتواجدين -->
-<div class="sidebar" id="usersSidebar">
-  <span class="sidebar-close" onclick="closeSidebar('users')">&times;</span>
-  <div class="sidebar-header">👥 المتواجدون</div>
-  <div style="display:flex;gap:5px;margin-bottom:10px">
-    <button onclick="toggleAddFriend()" style="flex:1;padding:8px;background:#4CAF50;color:#fff;border:none;border-radius:5px;cursor:pointer">➕ إضافة</button>
-    <input type="text" id="searchUser" placeholder="البحث..." style="flex:1;padding:8px;border:1px solid #ddd;border-radius:5px">
-  </div>
-  <div class="users-list" id="usersList"></div>
-</div>
-
-<script src="/js/main.js"></script>
+    <script src="js/auth.js"></script>
 </body>
-</html>
+</html>'''
+
+with open("/mnt/agents/output/chat-yemen/index.html", "w", encoding="utf-8") as f:
+    f.write(index_html)
+    
+print("✅ تم إنشاء index.html")
