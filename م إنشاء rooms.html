@@ -1,0 +1,213 @@
+
+# إنشاء ملف rooms.html - صفحة الغرف
+rooms_html = '''<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الغرف - شات اليمن المطور 🌙</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/rooms.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <!-- خلفية -->
+    <div class="bg-animation">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+    </div>
+
+    <div class="rooms-container">
+        
+        <!-- الشريط العلوي -->
+        <header class="rooms-header">
+            <div class="header-content">
+                <div class="logo-small">
+                    <span class="logo-icon">🌙</span>
+                    <span class="logo-text">شات اليمن</span>
+                </div>
+                <div class="header-actions">
+                    <button class="header-btn" id="notifications-btn" title="الإشعارات">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge" id="notif-badge">0</span>
+                    </button>
+                    <div class="user-mini" id="user-mini">
+                        <img src="" alt="" id="mini-avatar" class="mini-avatar">
+                        <span id="mini-name"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- معلومات المستخدم -->
+        <div class="user-info-bar">
+            <div class="user-info-content">
+                <div class="user-info-item">
+                    <i class="fas fa-coins"></i>
+                    <span id="user-balance">0</span> 💲
+                </div>
+                <div class="user-info-item">
+                    <i class="fas fa-star"></i>
+                    <span id="user-role">زائر</span>
+                </div>
+                <div class="user-info-item">
+                    <i class="fas fa-heart"></i>
+                    <span id="user-likes">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- عنوان القسم -->
+        <div class="section-title">
+            <h2><i class="fas fa-door-open"></i> الغرف المتاحة</h2>
+            <p>اختر غرفة للدخول والدردشة</p>
+        </div>
+
+        <!-- قائمة الغرف -->
+        <div class="rooms-list" id="rooms-list">
+            
+            <!-- غرفة العامة -->
+            <div class="room-card" data-room="general">
+                <div class="room-bg general-bg">
+                    <div class="room-icon">🌎</div>
+                </div>
+                <div class="room-info">
+                    <h3 class="room-name">غرفة العامة</h3>
+                    <p class="room-desc">الدردشة العامة مع الجميع</p>
+                    <div class="room-stats">
+                        <span class="room-users"><i class="fas fa-users"></i> <span class="count">342</span></span>
+                        <span class="room-status online"><i class="fas fa-circle"></i> نشطة</span>
+                    </div>
+                </div>
+                <button class="enter-room-btn" data-room="general">
+                    <span>اضغط هنا للدخول</span>
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+
+            <!-- غرفة اليمن -->
+            <div class="room-card" data-room="yemen">
+                <div class="room-bg yemen-bg">
+                    <div class="room-icon">🇾🇪</div>
+                </div>
+                <div class="room-info">
+                    <h3 class="room-name">غرفة اليمن</h3>
+                    <p class="room-desc">دردشة أبناء اليمن</p>
+                    <div class="room-stats">
+                        <span class="room-users"><i class="fas fa-users"></i> <span class="count">156</span></span>
+                        <span class="room-status online"><i class="fas fa-circle"></i> نشطة</span>
+                    </div>
+                </div>
+                <button class="enter-room-btn" data-room="yemen">
+                    <span>اضغط هنا للدخول</span>
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+
+            <!-- غرفة الجزائر -->
+            <div class="room-card" data-room="algeria">
+                <div class="room-bg algeria-bg">
+                    <div class="room-icon">🇩🇿</div>
+                </div>
+                <div class="room-info">
+                    <h3 class="room-name">غرفة الجزائر</h3>
+                    <p class="room-desc">دردشة أبناء الجزائر</p>
+                    <div class="room-stats">
+                        <span class="room-users"><i class="fas fa-users"></i> <span class="count">89</span></span>
+                        <span class="room-status online"><i class="fas fa-circle"></i> نشطة</span>
+                    </div>
+                </div>
+                <button class="enter-room-btn" data-room="algeria">
+                    <span>اضغط هنا للدخول</span>
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+
+            <!-- غرفة مصر -->
+            <div class="room-card" data-room="egypt">
+                <div class="room-bg egypt-bg">
+                    <div class="room-icon">🇪🇬</div>
+                </div>
+                <div class="room-info">
+                    <h3 class="room-name">غرفة مصر</h3>
+                    <p class="room-desc">دردشة أبناء مصر</p>
+                    <div class="room-stats">
+                        <span class="room-users"><i class="fas fa-users"></i> <span class="count">203</span></span>
+                        <span class="room-status online"><i class="fas fa-circle"></i> نشطة</span>
+                    </div>
+                </div>
+                <button class="enter-room-btn" data-room="egypt">
+                    <span>اضغط هنا للدخول</span>
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+
+            <!-- غرفة السعودية -->
+            <div class="room-card" data-room="saudi">
+                <div class="room-bg saudi-bg">
+                    <div class="room-icon">🇸🇦</div>
+                </div>
+                <div class="room-info">
+                    <h3 class="room-name">غرفة السعودية</h3>
+                    <p class="room-desc">دردشة أبناء السعودية</p>
+                    <div class="room-stats">
+                        <span class="room-users"><i class="fas fa-users"></i> <span class="count">178</span></span>
+                        <span class="room-status online"><i class="fas fa-circle"></i> نشطة</span>
+                    </div>
+                </div>
+                <button class="enter-room-btn" data-room="saudi">
+                    <span>اضغط هنا للدخول</span>
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+
+            <!-- غرفة الإمارات -->
+            <div class="room-card" data-room="uae">
+                <div class="room-bg uae-bg">
+                    <div class="room-icon">🇦🇪</div>
+                </div>
+                <div class="room-info">
+                    <h3 class="room-name">غرفة الإمارات</h3>
+                    <p class="room-desc">دردشة أبناء الإمارات</p>
+                    <div class="room-stats">
+                        <span class="room-users"><i class="fas fa-users"></i> <span class="count">67</span></span>
+                        <span class="room-status online"><i class="fas fa-circle"></i> نشطة</span>
+                    </div>
+                </div>
+                <button class="enter-room-btn" data-room="uae">
+                    <span>اضغط هنا للدخول</span>
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- التذييل -->
+        <footer class="rooms-footer">
+            <button class="logout-btn" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                تسجيل الخروج
+            </button>
+        </footer>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast-container"></div>
+
+    <!-- Loading -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+            <p>جاري الدخول للغرفة...</p>
+        </div>
+    </div>
+
+    <script src="js/rooms.js"></script>
+</body>
+</html>'''
+
+with open("/mnt/agents/output/chat-yemen/rooms.html", "w", encoding="utf-8") as f:
+    f.write(rooms_html)
+    
+print("✅ تم إنشاء rooms.html")
