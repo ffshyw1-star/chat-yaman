@@ -1,0 +1,1773 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>شات اليمن المطور — دردشة عربية آمنة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================
+   Yemen Chat — Styles (RTL, responsive)
+   ============================================ */
+:root{
+  --bg-0:#0f1117;
+  --bg-1:#161a26;
+  --bg-2:#1d2333;
+  --bg-3:#252b3d;
+  --primary:#d4a857;          /* ذهبي يمني */
+  --primary-2:#b78a3c;
+  --accent:#c0392b;            /* أحمر يمني */
+  --success:#2ecc71;
+  --danger:#e74c3c;
+  --info:#3498db;
+  --text:#ecf0f5;
+  --text-muted:#9aa3b2;
+  --border:rgba(255,255,255,.08);
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --radius:14px;
+  --radius-sm:10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Cairo','Tajawal',Tahoma,sans-serif;
+  background:var(--bg-0);
+  color:var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+  direction:rtl;
+}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font-family:inherit;border:none;background:none;color:inherit}
+input,textarea,select{font-family:inherit;outline:none}
+
+/* ============================================
+   Hero / Landing
+   ============================================ */
+.hero{
+  position:relative;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  padding:24px 20px 60px;
+  overflow:hidden;
+}
+.hero-bg{
+  position:absolute;inset:0;z-index:0;
+  background:linear-gradient(135deg,#0a0d15 0%,#1a1420 50%,#0a0d15 100%);
+}
+.hero-slides{
+  position:absolute;inset:0;z-index:1;opacity:.35;
+}
+.hero-slides img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  opacity:0;transition:opacity 1.5s ease;
+}
+.hero-slides img.active{opacity:1}
+.hero-overlay{
+  position:absolute;inset:0;z-index:2;
+  background:radial-gradient(circle at 30% 30%,rgba(212,168,87,.18),transparent 60%),
+             linear-gradient(180deg,rgba(15,17,23,.7) 0%,rgba(15,17,23,.95) 100%);
+}
+.hero-content{
+  position:relative;z-index:3;flex:1;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  max-width:1100px;margin:0 auto;width:100%;
+}
+.hero-logo{
+  display:flex;align-items:center;gap:14px;margin-bottom:18px;margin-top:30px;
+}
+.hero-logo .flag{font-size:48px;filter:drop-shadow(0 4px 12px rgba(212,168,87,.5))}
+.hero-logo h1{
+  font-size:clamp(28px,5vw,46px);font-weight:900;
+  background:linear-gradient(135deg,var(--primary),#f4d27a);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 2px 20px rgba(212,168,87,.3);
+}
+.hero-tagline{
+  font-size:clamp(16px,2.2vw,20px);
+  color:var(--text-muted);margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;
+}
+.hero-tagline .dot{width:6px;height:6px;background:var(--primary);border-radius:50%}
+.hero-cities{
+  font-size:13px;color:var(--primary-2);letter-spacing:1px;
+  margin-bottom:28px;
+}
+.hero-banner-frame{
+  position:relative;width:100%;max-width:900px;
+  aspect-ratio:16/7;border-radius:var(--radius);
+  overflow:hidden;border:2px solid var(--border);
+  box-shadow:var(--shadow);margin-bottom:30px;
+}
+.hero-banner-frame img{
+  width:100%;height:100%;object-fit:cover;
+  transition:opacity 1s ease;
+}
+.hero-banner-frame .city-label{
+  position:absolute;bottom:14px;right:14px;
+  background:rgba(0,0,0,.7);backdrop-filter:blur(10px);
+  padding:8px 16px;border-radius:30px;
+  font-size:13px;color:var(--primary);font-weight:600;
+  border:1px solid var(--primary);
+}
+.hero-description{
+  font-size:clamp(15px,2vw,18px);
+  color:var(--text);max-width:680px;margin:0 auto 36px;line-height:1.8;
+}
+.hero-buttons{
+  display:flex;gap:14px;flex-wrap:wrap;justify-content:center;
+}
+.btn{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:14px 28px;font-size:16px;font-weight:600;
+  border-radius:var(--radius);transition:.25s;
+  border:1px solid var(--border);background:var(--bg-2);
+  position:relative;overflow:hidden;
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(0,0,0,.4)}
+.btn-primary{
+  background:linear-gradient(135deg,var(--primary),var(--primary-2));
+  color:#0a0d15 !important;border:none;
+}
+.btn-primary::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent,rgba(255,255,255,.2));
+  opacity:0;transition:.3s;
+}
+.btn-primary:hover::after{opacity:1}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--text)}
+.btn-ghost:hover{background:rgba(255,255,255,.1)}
+.btn-danger{background:linear-gradient(135deg,#b71c1c,#c0392b);color:#fff}
+.btn-info{background:linear-gradient(135deg,#2980b9,#3498db);color:#fff}
+
+/* ============================================
+   Sections
+   ============================================ */
+.section{
+  padding:80px 20px;position:relative;
+}
+.section-inner{max-width:1100px;margin:0 auto}
+.section-title{
+  font-size:clamp(24px,3.5vw,34px);font-weight:800;
+  text-align:center;margin-bottom:14px;color:var(--primary);
+  position:relative;display:inline-block;
+}
+.section-title.center{display:block;text-align:center}
+.section-title::after{
+  content:'';display:block;width:60px;height:3px;
+  background:linear-gradient(90deg,var(--primary),transparent);
+  margin:12px auto 0;border-radius:3px;
+}
+.section-subtitle{
+  text-align:center;color:var(--text-muted);font-size:16px;
+  margin-bottom:50px;max-width:680px;margin-left:auto;margin-right:auto;
+}
+
+/* About */
+.about-wrap{
+  display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;
+}
+.about-text p{
+  font-size:16px;line-height:1.9;color:var(--text-muted);margin-bottom:14px;
+}
+.about-visual{
+  position:relative;height:280px;border-radius:var(--radius);
+  overflow:hidden;border:1px solid var(--border);
+}
+.about-visual img{width:100%;height:100%;object-fit:cover}
+.about-visual::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(212,168,87,.1),transparent);
+}
+
+/* Features */
+.features-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px;
+}
+.feature-card{
+  background:linear-gradient(135deg,var(--bg-1),var(--bg-2));
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:26px 22px;transition:.3s;position:relative;overflow:hidden;
+}
+.feature-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--primary),transparent);
+  opacity:0;transition:.3s;
+}
+.feature-card:hover{transform:translateY(-4px);border-color:var(--primary)}
+.feature-card:hover::before{opacity:1}
+.feature-icon{font-size:36px;margin-bottom:12px;display:block}
+.feature-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px}
+.feature-desc{font-size:14px;color:var(--text-muted)}
+
+/* Why us */
+.why-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:20px;margin-top:30px;
+}
+.why-card{
+  text-align:center;background:var(--bg-1);
+  padding:30px 20px;border-radius:var(--radius);
+  border:1px solid var(--border);
+}
+.why-icon{font-size:44px;margin-bottom:10px;display:block}
+.why-title{font-weight:700;font-size:18px;color:var(--primary)}
+
+/* Policy */
+.policy-list{
+  background:var(--bg-1);border:1px solid var(--border);
+  border-radius:var(--radius);padding:30px;
+}
+.policy-list li{
+  list-style:none;padding:12px 14px;
+  display:flex;align-items:center;gap:12px;
+  border-bottom:1px solid var(--border);font-size:15px;
+}
+.policy-list li:last-child{border-bottom:none}
+.policy-list .check{
+  width:24px;height:24px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--primary-2));
+  display:flex;align-items:center;justify-content:center;
+  color:#0a0d15;font-weight:900;font-size:14px;flex-shrink:0;
+}
+
+/* Contact */
+.contact-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:18px;
+}
+.contact-card{
+  background:var(--bg-1);border:1px solid var(--border);
+  border-radius:var(--radius);padding:24px;
+  display:flex;align-items:center;gap:14px;transition:.2s;
+}
+.contact-card:hover{transform:translateY(-3px);border-color:var(--primary)}
+.contact-icon{font-size:32px;flex-shrink:0}
+.contact-label{font-size:13px;color:var(--text-muted);margin-bottom:3px}
+.contact-value{font-weight:700;color:var(--text)}
+
+/* Footer */
+.footer{
+  background:var(--bg-1);border-top:1px solid var(--border);
+  padding:30px 20px;text-align:center;font-size:14px;
+  color:var(--text-muted);
+}
+.footer .heart{color:var(--accent)}
+
+/* ============================================
+   APP — Rooms & Chat
+   ============================================ */
+.app{display:none;min-height:100vh;flex-direction:column}
+.app.show{display:flex}
+
+/* Top bar (chat) */
+.topbar{
+  background:var(--bg-1);border-bottom:1px solid var(--border);
+  padding:10px 18px;display:flex;align-items:center;gap:14px;
+  position:sticky;top:0;z-index:30;
+}
+.topbar .room-info{flex:1;min-width:0}
+.topbar .room-title{display:flex;align-items:center;gap:10px;font-weight:700}
+.topbar .room-title .flag{font-size:20px}
+.topbar .room-meta{font-size:12px;color:var(--text-muted);margin-top:2px}
+.profile-btn{
+  display:flex;align-items:center;gap:10px;padding:6px 10px;
+  border-radius:40px;background:var(--bg-2);transition:.2s;
+}
+.profile-btn:hover{background:var(--bg-3)}
+.profile-btn .avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+  border:2px solid var(--primary);
+}
+.profile-btn .name{font-size:13px;font-weight:600;color:var(--primary)}
+
+/* Action bar */
+.actionbar{
+  display:flex;justify-content:space-around;align-items:center;
+  background:var(--bg-1);border-bottom:1px solid var(--border);
+  padding:8px 6px;position:sticky;top:62px;z-index:29;
+}
+.action-bar-btn{
+  position:relative;
+  display:flex;flex-direction:column;align-items:center;gap:3px;
+  padding:6px 12px;border-radius:10px;transition:.2s;font-size:12px;
+  color:var(--text-muted);
+}
+.action-bar-btn:hover{background:var(--bg-2);color:var(--primary)}
+.action-bar-btn .ic{font-size:22px}
+.action-bar-btn .badge{
+  position:absolute;top:0;left:0;
+  background:var(--accent);color:#fff;font-size:10px;
+  min-width:18px;height:18px;padding:0 4px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+  border:2px solid var(--bg-1);
+}
+
+/* Chat area */
+.chat-wrap{display:flex;flex:1;min-height:0}
+.sidebar{
+  width:0;background:var(--bg-1);
+  border-left:1px solid var(--border);
+  overflow:hidden;transition:width .3s;flex-shrink:0;
+}
+.sidebar.open{width:280px}
+.sidebar-inner{padding:16px;width:280px;height:100%;overflow-y:auto}
+.sidebar h3{
+  font-size:14px;color:var(--primary);margin-bottom:12px;
+  padding-bottom:8px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:8px;
+}
+.sidebar .menu-item{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;
+  border-radius:8px;font-size:14px;cursor:pointer;transition:.15s;
+  color:var(--text);
+}
+.sidebar .menu-item:hover{background:var(--bg-2);color:var(--primary)}
+.sidebar .menu-item .ic{font-size:18px}
+.status-toggle{
+  display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;
+}
+.status-pill{
+  padding:6px 12px;border-radius:20px;font-size:12px;
+  background:var(--bg-2);border:1px solid var(--border);cursor:pointer;
+}
+.status-pill.active{background:var(--success);color:#fff;border-color:var(--success)}
+
+.chat-area{
+  flex:1;display:flex;flex-direction:column;min-width:0;
+  background:linear-gradient(180deg,var(--bg-0),var(--bg-1));
+}
+.messages{
+  flex:1;overflow-y:auto;padding:18px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.msg{display:flex;gap:10px;align-items:flex-start;animation:fadeIn .3s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg-avatar{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
+  border:2px solid var(--bg-2);
+}
+.msg-content{flex:1;min-width:0}
+.msg-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.msg-name{font-weight:700;color:var(--primary);cursor:pointer}
+.msg-name:hover{text-decoration:underline}
+.msg-time{font-size:11px;color:var(--text-muted)}
+.msg-text{
+  background:var(--bg-2);padding:10px 14px;border-radius:14px;
+  border-top-right-radius:4px;margin-top:4px;display:inline-block;
+  max-width:100%;word-wrap:break-word;
+}
+.msg-actions{
+  display:flex;gap:8px;margin-top:4px;
+  font-size:12px;color:var(--text-muted);
+}
+.msg-actions button:hover{color:var(--accent)}
+.msg.sys{align-items:center;justify-content:center;text-align:center}
+.msg.sys .msg-content{
+  background:rgba(212,168,87,.12);border:1px solid var(--primary);
+  color:var(--primary);padding:6px 14px;border-radius:20px;font-size:13px;
+}
+.msg.premium .msg-name::after{
+  content:' 💎';color:var(--primary);
+}
+
+/* Mention */
+.msg-name.mention-me{color:var(--accent);font-weight:900}
+
+/* Input */
+.input-bar{
+  background:var(--bg-1);border-top:1px solid var(--border);
+  padding:10px 12px;
+  display:flex;align-items:center;gap:8px;position:sticky;bottom:0;
+}
+.input-bar .icon-btn{
+  width:38px;height:38px;border-radius:50%;
+  background:var(--bg-2);display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;transition:.2s;
+}
+.input-bar .icon-btn:hover{background:var(--bg-3);color:var(--primary)}
+.input-bar .icon-btn.danger:hover{color:var(--accent)}
+.input-bar input[type=text]{
+  flex:1;background:var(--bg-2);border:1px solid var(--border);
+  padding:10px 14px;border-radius:24px;color:var(--text);
+  font-size:15px;
+}
+.input-bar input[type=text]:focus{border-color:var(--primary)}
+
+/* Bottom action bar */
+.bottombar{
+  background:var(--bg-1);border-top:1px solid var(--border);
+  display:flex;justify-content:space-around;padding:8px 4px;
+}
+.bottombar button{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:8px 4px;font-size:11px;color:var(--text-muted);transition:.15s;
+}
+.bottombar button:hover{color:var(--primary)}
+.bottombar .ic{font-size:20px}
+.bottombar .label{font-size:11px}
+
+/* Modals */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:none;align-items:center;justify-content:center;
+  z-index:100;backdrop-filter:blur(6px);padding:20px;
+}
+.modal-bg.show{display:flex}
+.modal{
+  background:var(--bg-1);border:1px solid var(--border);
+  border-radius:var(--radius);width:100%;max-width:520px;
+  max-height:90vh;overflow-y:auto;
+  box-shadow:var(--shadow);
+}
+.modal-lg{max-width:820px}
+.modal .modal-head{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:var(--bg-1);z-index:2;
+}
+.modal .modal-head h3{font-size:17px;color:var(--primary)}
+.modal .modal-body{padding:20px}
+.modal-close{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--bg-2);display:flex;align-items:center;justify-content:center;
+  font-size:18px;transition:.15s;
+}
+.modal-close:hover{background:var(--accent);color:#fff}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;color:var(--text-muted);margin-bottom:6px}
+.field input,.field textarea,.field select{
+  width:100%;background:var(--bg-2);border:1px solid var(--border);
+  padding:10px 12px;border-radius:10px;color:var(--text);font-size:14px;
+}
+.row{display:flex;gap:10px}
+.row>.field{flex:1}
+
+/* Profile page */
+.profile-cover{
+  height:160px;background:#000;overflow:hidden;position:relative;
+}
+.profile-cover img{width:100%;height:100%;object-fit:cover;opacity:.7}
+.profile-cover::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent,var(--bg-1) 90%);
+}
+.profile-info{
+  padding:0 20px;margin-top:-50px;position:relative;z-index:2;
+  display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;
+}
+.profile-avatar{
+  width:90px;height:90px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;
+  border:4px solid var(--bg-1);
+}
+.profile-meta{flex:1;padding-top:50px}
+.profile-meta h2{font-size:22px;color:var(--primary);display:flex;align-items:center;gap:8px}
+.profile-meta .role-badge{
+  display:inline-block;background:var(--primary);color:#0a0d15;
+  padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;margin-top:6px;
+}
+.profile-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;padding:0 20px 16px}
+.like-count{
+  display:flex;align-items:center;gap:6px;font-size:14px;color:var(--accent);
+}
+.profile-tabs{
+  display:flex;gap:0;border-bottom:1px solid var(--border);
+  margin:0 20px;
+}
+.profile-tabs button{
+  padding:12px 18px;font-size:14px;color:var(--text-muted);
+  border-bottom:2px solid transparent;transition:.2s;
+}
+.profile-tabs button.active{color:var(--primary);border-bottom-color:var(--primary)}
+.profile-tab{padding:20px}
+.friends-grid,.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.friend-card,.gallery-item{
+  background:var(--bg-2);border-radius:10px;padding:10px;text-align:center;
+  cursor:pointer;border:1px solid var(--border);transition:.2s;
+}
+.friend-card:hover{border-color:var(--primary);transform:translateY(-2px)}
+.friend-card .av{
+  width:50px;height:50px;border-radius:50%;margin:0 auto 6px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+}
+.gallery-item{height:110px}
+.gallery-item img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+
+/* Popover for clicking on user */
+.popover{
+  position:fixed;z-index:99;background:var(--bg-1);
+  border:1px solid var(--primary);border-radius:var(--radius);
+  padding:14px;width:240px;box-shadow:var(--shadow);
+  display:none;
+}
+.popover.show{display:block}
+.popover-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.popover-head .av{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+}
+.popover-head .nm{font-weight:700;color:var(--primary)}
+.popover-head .info{font-size:11px;color:var(--text-muted)}
+.popover-actions{display:flex;flex-direction:column;gap:6px}
+.popover-actions button{
+  width:100%;padding:8px 10px;font-size:13px;
+  background:var(--bg-2);border-radius:8px;text-align:right;
+  display:flex;align-items:center;gap:8px;
+}
+.popover-actions button:hover{background:var(--bg-3);color:var(--primary)}
+.popover-actions .danger{color:var(--accent)}
+
+/* Friends request list */
+.friend-req{
+  display:flex;align-items:center;gap:10px;padding:10px;
+  background:var(--bg-2);border-radius:10px;margin-bottom:8px;
+}
+.friend-req .av{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+}
+.friend-req .nm{flex:1;font-weight:700}
+.friend-req .btns{display:flex;gap:6px}
+.friend-req .btns button{
+  padding:5px 10px;border-radius:6px;font-size:12px;font-weight:600;
+}
+.accept-btn{background:var(--success);color:#fff}
+.reject-btn{background:var(--danger);color:#fff}
+
+/* Private messages */
+.private-list{display:flex;flex-direction:column;gap:6px}
+.private-list .pm{
+  display:flex;gap:10px;align-items:center;padding:10px;border-radius:8px;
+  cursor:pointer;transition:.15s;
+}
+.private-list .pm:hover{background:var(--bg-2)}
+.private-list .pm.unread{background:rgba(192,57,43,.1);border-right:3px solid var(--accent)}
+
+/* Store */
+.store-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.store-card{
+  background:linear-gradient(135deg,var(--bg-2),var(--bg-3));
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;text-align:center;transition:.3s;
+}
+.store-card:hover{transform:translateY(-4px);border-color:var(--primary)}
+.store-card .price{font-size:24px;font-weight:900;color:var(--primary);margin:12px 0}
+.store-card .price .currency{font-size:14px;color:var(--text-muted)}
+.store-card .name{font-size:17px;font-weight:700;margin-bottom:6px}
+
+/* News feed */
+.news-feed{display:flex;flex-direction:column;gap:16px}
+.news-item{
+  background:var(--bg-2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:16px;
+}
+.news-item .head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.news-item .av-sm{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+}
+.news-item .author{font-weight:700;color:var(--primary)}
+.news-item .time{font-size:11px;color:var(--text-muted)}
+.news-item .body{margin:8px 0;color:var(--text)}
+.news-item .reactions{display:flex;gap:14px;font-size:13px;color:var(--text-muted)}
+.news-item .reactions span:hover{color:var(--primary);cursor:pointer}
+
+/* Online list */
+.online-list{display:flex;flex-direction:column;gap:4px}
+.online-row{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border-radius:8px;cursor:pointer;transition:.15s;
+}
+.online-row:hover{background:var(--bg-2)}
+.online-row .av{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+  position:relative;
+}
+.online-row .av .dot{
+  position:absolute;bottom:0;left:0;width:11px;height:11px;border-radius:50%;
+  background:var(--success);border:2px solid var(--bg-1);
+}
+.online-row .nm{flex:1;font-weight:700;font-size:14px}
+.online-row .r{font-size:14px;color:var(--primary)}
+.online-section{
+  font-size:11px;color:var(--text-muted);text-transform:uppercase;
+  padding:8px 10px;margin-top:6px;
+}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+  background:var(--primary);color:#0a0d15;padding:12px 22px;
+  border-radius:30px;font-weight:600;font-size:14px;
+  box-shadow:var(--shadow);z-index:200;
+  opacity:0;transition:.3s;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translate(-50%,-10px)}
+
+/* Rooms list screen */
+.rooms-list{
+  display:flex;flex-direction:column;gap:16px;padding:20px;max-width:800px;margin:0 auto;width:100%;
+}
+.rooms-list-title{
+  font-size:22px;font-weight:800;color:var(--primary);
+  margin-bottom:8px;text-align:center;
+}
+.room-card{
+  background:linear-gradient(135deg,var(--bg-1),var(--bg-2));
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px 20px;display:flex;align-items:center;gap:16px;
+  transition:.3s;cursor:pointer;
+}
+.room-card:hover{transform:translateY(-3px);border-color:var(--primary);box-shadow:var(--shadow)}
+.room-flag{font-size:38px;flex-shrink:0}
+.room-info2{flex:1}
+.room-info2 .nm{font-weight:700;font-size:17px;color:var(--primary)}
+.room-info2 .desc{font-size:12px;color:var(--text-muted);margin-top:2px}
+.room-info2 .online{font-size:11px;color:var(--success);margin-top:4px}
+.room-enter{
+  background:linear-gradient(135deg,var(--primary),var(--primary-2));
+  color:#0a0d15;font-weight:700;padding:8px 16px;border-radius:8px;font-size:13px;
+  white-space:nowrap;
+}
+.room-enter:hover{filter:brightness(1.1)}
+
+/* Login */
+.login-card{
+  background:rgba(0,0,0,.5);backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-radius:var(--radius);
+  padding:30px;width:100%;max-width:420px;margin:0 auto;
+}
+.login-tabs{display:flex;gap:0;margin-bottom:20px}
+.login-tabs button{
+  flex:1;padding:12px;font-weight:600;font-size:14px;
+  color:var(--text-muted);background:transparent;
+  border-bottom:2px solid var(--border);
+}
+.login-tabs button.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* Notification Dot */
+.dot-indicator{
+  width:8px;height:8px;border-radius:50%;background:var(--accent);
+  display:inline-block;margin-right:4px;
+}
+
+/* Responsive */
+@media (max-width: 900px){
+  .about-wrap{grid-template-columns:1fr}
+  .sidebar.open{position:fixed;top:0;right:0;bottom:0;width:280px;z-index:50}
+  .section{padding:60px 16px}
+  .hero{padding:18px 14px 50px}
+  .actionbar{padding:8px 2px;font-size:11px}
+  .action-bar-btn{padding:6px 6px;font-size:10px}
+  .action-bar-btn .ic{font-size:18px}
+  .topbar .name{display:none}
+  .profile-info{padding:0 14px}
+  .profile-meta h2{font-size:18px}
+}
+@media (max-width: 480px){
+  .topbar{padding:8px 10px;gap:8px}
+  .input-bar{padding:8px}
+  .input-bar .icon-btn{width:34px;height:34px;font-size:16px}
+  .btn{padding:12px 18px;font-size:14px}
+  .rooms-list{padding:14px}
+  .room-card{padding:14px}
+  .room-flag{font-size:30px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================
+     LANDING PAGE
+     ============================================ -->
+<section id="landing">
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-slides" id="heroSlides">
+    <img class="active" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Old_City_of_Sanaa.jpg/1280px-Old_City_of_Sanaa.jpg" alt="صنعاء القديمة"/>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Shibam_Hadramaut.jpg/1280px-Shibam_Hadramaut.jpg" alt="شبام حضرموت"/>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Dar_al-Hajar_01.jpg/1024px-Dar_al-Hajar_01.jpg" alt="دار الحجر"/>
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-logo">
+      <span class="flag">🇾🇪</span>
+      <h1>شات اليمن المطور</h1>
+    </div>
+    <div class="hero-tagline">
+      <span>دردشة عربية</span><span class="dot"></span>
+      <span>آمنة</span><span class="dot"></span>
+      <span>سريعة</span><span class="dot"></span>
+      <span>حديثة</span>
+    </div>
+    <div class="hero-cities">صنعاء القديمة • شبام • سقطرى • دار الحجر</div>
+
+    <div class="hero-banner-frame">
+      <img id="heroMainImg" src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Old_City_of_Sanaa.jpg/1280px-Old_City_of_Sanaa.jpg" alt="بانوراما التراث اليمني"/>
+      <div class="city-label" id="cityLabel">صنعاء القديمة — UNESCO</div>
+    </div>
+
+    <p class="hero-description">
+      منصة عربية أصيلة للتواصل، تحتفي بالتراث اليمني وتفتح أبوابها لكل العرب.
+      انضم الآن وكن جزءاً من مجتمع متجدد يجمع بين الأصالة والتقنية.
+    </p>
+
+    <div class="hero-buttons">
+      <button class="btn btn-ghost" onclick="openLogin('guest')">
+        <span>👤</span><span>دخول الزوار</span>
+      </button>
+      <button class="btn btn-primary" onclick="openLogin('member')">
+        <span>🔐</span><span>دخول الأعضاء</span>
+      </button>
+      <button class="btn btn-danger" onclick="openLogin('register')">
+        <span>📝</span><span>إنشاء حساب جديد</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- من نحن -->
+<section class="section" id="about">
+  <div class="section-inner">
+    <h2 class="section-title center">من نحن؟</h2>
+    <div class="about-wrap">
+      <div class="about-text">
+        <p>
+          <strong style="color:var(--primary)">شات اليمن المطور</strong> منصة دردشة عربية حديثة
+          تحتفي بالهوية اليمنية وتفتح أبوابها لكل العرب. نوفّر تجربة سلسة على الجوال والكمبيوتر،
+          مع اهتمام خاص بالحماية، والخصوصية، ومكافحة الإساءة.
+        </p>
+        <p>
+          مهمتنا إنشاء فضاء رقمي يمنح الجميع فرصة التعارف وتبادل الثقافات،
+          مع فريق رقابة فعّال ونظام آلي ذكي يحفظ للنقاش هيبته وللمستخدمين كرامتهم.
+        </p>
+      </div>
+      <div class="about-visual">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Dar_al-Hajar_01.jpg/1024px-Dar_al-Hajar_01.jpg" alt="دار الحجر"/>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- المميزات -->
+<section class="section" style="background:var(--bg-1)">
+  <div class="section-inner">
+    <h2 class="section-title center">مميزات الموقع</h2>
+    <p class="section-subtitle">كل ما تحتاجه لتجربة دردشة متكاملة وآمنة</p>
+    <div class="features-grid">
+      <div class="feature-card"><span class="feature-icon">💬</span><div class="feature-title">دردشة عامة</div><div class="feature-desc">غرف متنوعة حسب الاهتمام والوطن</div></div>
+      <div class="feature-card"><span class="feature-icon">✉️</span><div class="feature-title">رسائل خاصة</div><div class="feature-desc">تواصل فردي آمن ومشفر</div></div>
+      <div class="feature-card"><span class="feature-icon">👥</span><div class="feature-title">إضافة أصدقاء</div><div class="feature-desc">كوّن شبكة علاقاتك بسهولة</div></div>
+      <div class="feature-card"><span class="feature-icon">❤️</span><div class="feature-title">إعجابات</div><div class="feature-desc">تفاعل لايك واحد لكل عضوية</div></div>
+      <div class="feature-card"><span class="feature-icon">🎤</span><div class="feature-title">رسائل صوتية</div><div class="feature-desc">سجل وأرسل بصوتك</div></div>
+      <div class="feature-card"><span class="feature-icon">🔒</span><div class="feature-title">حماية وتشفير</div><div class="feature-desc">خصوصية كاملة ومراقبة دائمة</div></div>
+      <div class="feature-card"><span class="feature-icon">📱</span><div class="feature-title">متجاوب بالكامل</div><div class="feature-desc">يعمل على الهاتف والكمبيوتر</div></div>
+      <div class="feature-card"><span class="feature-icon">🎁</span><div class="feature-title">نظام رصيد ورتب</div><div class="feature-desc">ميز، مشرف، إدارة، مالك</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- لماذا نحن -->
+<section class="section">
+  <div class="section-inner">
+    <h2 class="section-title center">لماذا نحن؟</h2>
+    <p class="section-subtitle">قيم نتشاركها معك في كل محادثة</p>
+    <div class="why-grid">
+      <div class="why-card"><span class="why-icon">⚡</span><div class="why-title">سرعة</div></div>
+      <div class="why-card"><span class="why-icon">🛡️</span><div class="why-title">أمان</div></div>
+      <div class="why-card"><span class="why-icon">🌍</span><div class="why-title">مجتمع عربي</div></div>
+      <div class="why-card"><span class="why-icon">🎨</span><div class="why-title">تصميم حديث</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- السياسة -->
+<section class="section" style="background:var(--bg-1)">
+  <div class="section-inner">
+    <h2 class="section-title center">سياسة الموقع</h2>
+    <p class="section-subtitle">نتوقع من كل عضو الالتزام بهذه القواعد</p>
+    <ul class="policy-list">
+      <li><span class="check">✓</span> احترام الجميع وعدم الإساءة لأي مستخدم</li>
+      <li><span class="check">✓</span> منع السب والشتم بكافة أشكاله</li>
+      <li><span class="check">✓</span> منع الاحتيال والروابط المشبوهة</li>
+      <li><span class="check">✓</span> مراجعة البلاغات خلال 24 ساعة</li>
+      <li><span class="check">✓</span> حماية الخصوصية وعدم مشاركة بيانات الآخرين</li>
+      <li><span class="check">✓</span> يحق للإدارة كتم/طرد المخالفين حسب الأفعال</li>
+    </ul>
+  </div>
+</section>
+
+<!-- تواصل -->
+<section class="section">
+  <div class="section-inner">
+    <h2 class="section-title center">تواصل معنا</h2>
+    <p class="section-subtitle">دائماً معك — أرسل لنا في أي وقت</p>
+    <div class="contact-grid">
+      <div class="contact-card"><span class="contact-icon">📧</span><div><div class="contact-label">البريد الإلكتروني</div><div class="contact-value">support@yemenchat.dev</div></div></div>
+      <div class="contact-card"><span class="contact-icon">🌐</span><div><div class="contact-label">فيسبوك</div><div class="contact-value">@yemenchat</div></div></div>
+      <div class="contact-card"><span class="contact-icon">📱</span><div><div class="contact-label">تيليجرام</div><div class="contact-value">@yemenchat_support</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  © 2026 <span style="color:var(--primary);font-weight:700">شات اليمن المطور</span> — جميع الحقوق محفوظة • صُنع بـ <span class="heart">❤</span> في اليمن
+</footer>
+</section>
+
+<!-- ============================================
+     APP SHELL (Rooms + Chat)
+     ============================================ -->
+<div class="app" id="app">
+
+  <!-- Top bar with profile menu -->
+  <header class="topbar">
+    <button class="profile-btn" onclick="openProfileMe()">
+      <div class="avatar" id="topAvatar">ز</div>
+      <div>
+        <div class="name" id="topName">زائر</div>
+        <div style="font-size:10px;color:var(--text-muted)" id="topRole">زائر</div>
+      </div>
+    </button>
+    <div class="room-info">
+      <div class="room-title"><span class="flag" id="roomFlag">🌎</span><span id="roomTitle">غرفة العامة</span></div>
+      <div class="room-meta"><span id="roomOnline">128</span> متصل الآن</div>
+    </div>
+    <button class="modal-close" onclick="showLanding()" title="رجوع للرئيسية" style="margin-right:auto">🏠</button>
+  </header>
+
+  <!-- Top action bar -->
+  <div class="actionbar">
+    <button class="action-bar-btn" onclick="openModal('modalPm')">
+      <span class="ic">📭</span><span>البلاغات</span>
+      <span class="badge" style="display:none" id="badgeReports">0</span>
+    </button>
+    <button class="action-bar-btn" onclick="openModal('modalLikes')">
+      <span class="ic">❤️</span><span>الإعجابات</span>
+      <span class="badge" style="display:none" id="badgeLikes">0</span>
+    </button>
+    <button class="action-bar-btn" onclick="openModal('modalFriends')">
+      <span class="ic">➕👥</span><span>الأصدقاء</span>
+      <span class="badge" style="display:none" id="badgeFriends">3</span>
+    </button>
+    <button class="action-bar-btn" onclick="openModal('modalInbox')">
+      <span class="ic">✉️</span><span>الخاص</span>
+      <span class="badge" id="badgePm">1</span>
+    </button>
+    <button class="action-bar-btn" data-roles="vip,mod,admin,super,owner" onclick="openModal('modalStore')">
+      <span class="ic">🛒</span><span>المتجر</span>
+    </button>
+    <button class="action-bar-btn" onclick="toggleSidebar()">
+      <span class="ic">☰</span><span>القائمة</span>
+    </button>
+  </div>
+
+  <!-- Sidebar (right side in RTL) -->
+  <div class="chat-wrap">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-inner">
+      <h3>👤 <span id="sbName">الملف الشخصي</span></h3>
+      <div class="menu-item" onclick="openProfileMe()"><span class="ic">🪪</span><span>ملفي الشخصي</span></div>
+      <div class="menu-item" onclick="openModal('modalRooms')"><span class="ic">📋</span><span>قائمة الغرف</span></div>
+      <div class="menu-item" data-roles="mod,admin,super,owner" onclick="openModal('modalAdmin')"><span class="ic">⚙️</span><span>لوحة التحكم</span></div>
+      <div class="menu-item" onclick="logout()"><span class="ic">🚪</span><span>خروج</span></div>
+
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
+        <h3>🟢 الحالة</h3>
+        <div class="status-toggle" id="statusToggle">
+          <div class="status-pill active" data-s="online">متصل 🟢</div>
+          <div class="status-pill" data-s="away">بعيد 🟡</div>
+          <div class="status-pill" data-s="busy">مشغول 🔴</div>
+        </div>
+      </div>
+
+      <h3>📰 الأخبار</h3>
+      <div class="menu-item" onclick="openModal('modalNews')"><span class="ic">📢</span><span>عرض الأخبار</span></div>
+
+      <h3>🛍️ شراء الرصيد</h3>
+      <div class="menu-item" onclick="openModal('modalCredit')"><span class="ic">💳</span><span>شراء الرصيد</span></div>
+
+      <div class="menu-item" data-roles="owner" onclick="openModal('modalBan')"><span class="ic">🚫</span><span>قائمة الحظر</span></div>
+
+      <div style="margin-top:auto;padding-top:14px;border-top:1px solid var(--border);text-align:center;font-size:11px;color:var(--text-muted)">
+        <span>متصل* <strong style="color:var(--primary)">128</strong></span><br>
+        <button class="modal-close" onclick="toggleSidebar()" style="margin:10px auto 0">✖</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chat area -->
+  <main class="chat-area">
+    <div class="messages" id="messages"></div>
+    <div class="input-bar">
+      <button class="icon-btn" data-roles="vip,mod,admin,super,owner" onclick="alert('رفع صورة/ملف')" title="إرفاق">📎</button>
+      <button class="icon-btn" onclick="alert('قائمة الإيموجي')" title="إيموجي">😊</button>
+      <button class="icon-btn" onclick="alert('بدء تسجيل صوتي')" title="تسجيل صوتي">🎤</button>
+      <input type="text" id="msgInput" placeholder="اكتب هنا..." onkeydown="if(event.key==='Enter')sendMessage()"/>
+      <button class="icon-btn" onclick="sendMessage()" title="إرسال">➤</button>
+    </div>
+    <div class="bottombar">
+      <button onclick="openModal('modalOnline')"><span class="ic">👥</span><span class="label">المتواجدون</span></button>
+      <button onclick="openModal('modalRooms')"><span class="ic">🏠</span><span class="label">الغرف</span></button>
+      <button onclick="openModal('modalSettings')"><span class="ic">⚙️</span><span class="label">إعدادات</span></button>
+      <button onclick="toggleSidebar()"><span class="ic">🌎</span><span class="label" id="bbRoom">غرفة العامة</span></button>
+      <button onclick="alert('تشغيل/كتم الصوت')"><span class="ic">🔊</span><span class="label">الصوت</span></button>
+    </div>
+  </main>
+  </div>
+</div>
+
+<!-- ============================================
+     LOGIN MODAL (inline in landing)
+     ============================================ -->
+<div class="modal-bg" id="modalLogin">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="loginTitle">دخول الزوار</h3>
+      <button class="modal-close" onclick="closeModal('modalLogin')">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="login-tabs">
+        <button class="active" data-mode="guest" onclick="switchLogin('guest', this)">👤 زائر</button>
+        <button data-mode="member" onclick="switchLogin('member', this)">🔐 عضو</button>
+        <button data-mode="register" onclick="switchLogin('register', this)">📝 جديد</button>
+      </div>
+      <form id="loginForm" onsubmit="event.preventDefault();submitLogin()">
+        <div class="field" id="nameRow" style="display:none"><label>الاسم</label><input type="text" placeholder="اختر اسمك في الشات" required></div>
+        <div class="field" id="emailRow" style="display:none"><label>البريد الإلكتروني</label><input type="email" placeholder="example@mail.com" required></div>
+        <div class="field" id="passRow" style="display:none"><label>كلمة المرور</label><input type="password" placeholder="••••••" required></div>
+        <div id="guestNotice" style="background:rgba(212,168,87,.08);border:1px solid var(--primary-2);padding:12px;border-radius:10px;font-size:13px;color:var(--primary)">
+          👤 دخول كزائر: تستطيع الدخول للدردشة وتسجيل صوت، لكن لا تستطيع رفع صور أو إرسال يوتيوب.
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:14px;justify-content:center">دخول</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     PROFILE FULL PAGE (modal-lg)
+     ============================================ -->
+<div class="modal-bg" id="modalProfile">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3>الملف الشخصي</h3>
+      <div style="display:flex;gap:6px">
+        <button class="modal-close" data-roles="mod,admin,super,owner" title="الأمر" onclick="alert('فتح الأمر')">⚡</button>
+        <button class="modal-close" data-roles="admin,super,owner" title="سجل العضو" onclick="alert('فتح السجل')">📝</button>
+        <button class="modal-close" onclick="closeModal('modalProfile')" title="إغلاق">✖</button>
+      </div>
+    </div>
+    <div class="modal-body" style="padding:0">
+      <div class="profile-cover">
+        <img id="pfCover" src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Shibam_Hadramaut.jpg/1280px-Shibam_Hadramaut.jpg"/>
+      </div>
+      <div class="profile-info">
+        <div class="profile-avatar" id="pfAv">م</div>
+        <div class="profile-meta">
+          <h2 id="pfName">محمد اليماني <span id="pfFlag">🇾🇪</span></h2>
+          <span class="role-badge" id="pfRole">💎 مميز</span>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:8px" id="pfStatus">أهلاً بكم في شات اليمن 👋</div>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <button class="btn btn-danger" style="padding:8px 14px;font-size:13px"><span>❤️</span> <span id="pfLikes">63</span></button>
+        <button class="btn btn-info" style="padding:8px 14px;font-size:13px" onclick="openModal('modalInbox');closeModal('modalProfile')"><span>💬</span> رسالة</button>
+        <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px" onclick="alert('تم إرسال طلب صداقة')"><span>👥+</span> إضافة صديق</button>
+        <button class="btn btn-ghost" style="padding:8px 14px;font-size:13px" onclick="alert('تم التجاهل')"><span>🚫</span> تجاهل</button>
+      </div>
+      <div class="profile-tabs">
+        <button class="active" onclick="switchProfTab('info', this)">معلوماتي</button>
+        <button onclick="switchProfTab('friends', this)">الأصدقاء</button>
+        <button onclick="switchProfTab('meta', this)">معلومات</button>
+      </div>
+      <div class="profile-tab" id="ptInfo">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="background:var(--bg-2);padding:14px;border-radius:10px"><div style="color:var(--text-muted);font-size:12px">الرصيد</div><div style="font-size:18px;color:var(--primary);font-weight:700" id="pfCredits">1250 💲</div></div>
+          <div style="background:var(--bg-2);padding:14px;border-radius:10px"><div style="color:var(--text-muted);font-size:12px">البلد</div><div style="font-size:16px;font-weight:600">اليمن 🇾🇪</div></div>
+          <div style="background:var(--bg-2);padding:14px;border-radius:10px"><div style="color:var(--text-muted);font-size:12px">العمر</div><div style="font-size:16px;font-weight:600">26</div></div>
+          <div style="background:var(--bg-2);padding:14px;border-radius:10px"><div style="color:var(--text-muted);font-size:12px">الجنس</div><div style="font-size:16px;font-weight:600">ذكر</div></div>
+          <div style="background:var(--bg-2);padding:14px;border-radius:10px;grid-column:1/-1"><div style="color:var(--text-muted);font-size:12px">الغرفة الحالية</div><div style="font-size:16px;font-weight:600">🌎 غرفة العامة</div></div>
+        </div>
+        <div style="margin-top:14px;background:var(--bg-2);padding:14px;border-radius:10px">
+          <div style="color:var(--text-muted);font-size:12px;margin-bottom:6px">النبذة التعريفية</div>
+          <div>أهلاً بكم، أنا من صنعاء أعشق التراث اليمني وأحب الدردشة مع الأصدقاء ❤️</div>
+        </div>
+      </div>
+      <div class="profile-tab" id="ptFriends" style="display:none">
+        <div class="friends-grid">
+          <div class="friend-card"><div class="av">أ</div><div>أحمد</div></div>
+          <div class="friend-card"><div class="av">س</div><div>سارة</div></div>
+          <div class="friend-card"><div class="av">خ</div><div>خنجر</div></div>
+          <div class="friend-card"><div class="av">ف</div><div>فاطمة</div></div>
+        </div>
+      </div>
+      <div class="profile-tab" id="ptMeta" style="display:none">
+        <div style="display:grid;gap:10px">
+          <div style="background:var(--bg-2);padding:14px;border-radius:10px"><div style="color:var(--text-muted);font-size:12px">آخر تواجد</div><div style="font-weight:600">17:45 — 20/07/2026</div></div>
+          <div style="background:var(--bg-2);padding:14px;border-radius:10px"><div style="color:var(--text-muted);font-size:12px">اللغة</div><div style="font-weight:600">العربية 🇸🇦</div></div>
+          <div style="background:var(--bg-2);padding:14px;border-radius:10px"><div style="color:var(--text-muted);font-size:12px">الثيم</div><div style="font-weight:600">Dark</div></div>
+          <div style="background:var(--bg-2);padding:14px;border-radius:10px" data-roles="owner"><div style="color:var(--accent);font-size:12px">🔒 IP — للمالك فقط</div><div style="font-weight:600">5.45.212.33 — خريطة: عدن</div></div>
+          <div style="background:var(--bg-2);padding:14px;border-radius:10px" data-roles="owner"><div style="color:var(--accent);font-size:12px">🔒 الحسابات المرتبطة</div><div style="font-weight:600">لا يوجد</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     ROOMS LIST MODAL
+     ============================================ -->
+<div class="modal-bg" id="modalRooms">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3>🪧 قائمة الغرف</h3>
+      <button class="modal-close" onclick="closeModal('modalRooms')">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="rooms-list" id="roomsListContainer"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     ONLINE / USERS LIST
+     ============================================ -->
+<div class="modal-bg" id="modalOnline">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>👥 المتواجدون</h3>
+      <button class="modal-close" onclick="closeModal('modalOnline')">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="row" style="margin-bottom:12px">
+        <div class="field" style="margin:0"><input type="text" placeholder="🔍 ابحث عن عضو..." id="onlineSearch" oninput="filterOnline()"/></div>
+      </div>
+      <div style="background:var(--bg-2);padding:12px;border-radius:10px;margin-bottom:12px;display:flex;justify-content:space-around;font-size:13px">
+        <span>👤➕ <a onclick="openModal('modalFriends')" style="cursor:pointer;color:var(--primary)">إضافة صديق</a></span>
+        <span>🏠 <a onclick="openModal('modalRooms')" style="cursor:pointer;color:var(--primary)">الرئيسية</a></span>
+        <span>🔍 بحث</span>
+        <span>متصل: <strong style="color:var(--primary)">128</strong></span>
+      </div>
+      <div class="online-list" id="onlineList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     FRIENDS REQUESTS
+     ============================================ -->
+<div class="modal-bg" id="modalFriends">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>➕👥 طلبات الصداقة</h3>
+      <button class="modal-close" onclick="closeModal('modalFriends')">✖</button>
+    </div>
+    <div class="modal-body" id="friendsContainer"></div>
+  </div>
+</div>
+
+<!-- ============================================
+     INBOX / PRIVATE MESSAGES
+     ============================================ -->
+<div class="modal-bg" id="modalInbox">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>✉️ الخاص</h3>
+      <button class="modal-close" onclick="closeModal('modalInbox')">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="private-list" id="pmList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     LIKES / NOTIFICATIONS
+     ============================================ -->
+<div class="modal-bg" id="modalLikes">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>❤️ الإعجابات والإشعارات</h3>
+      <button class="modal-close" onclick="closeModal('modalLikes')">✖</button>
+    </div>
+    <div class="modal-body">
+      <h4 style="color:var(--primary);margin-bottom:10px">الإعجابات على ملفك</h4>
+      <div class="online-list" style="margin-bottom:18px">
+        <div class="online-row"><div class="av">أ<small class="dot"></small></div><div class="nm">أحمد السعيد</div><div class="r">❤️</div></div>
+        <div class="online-row"><div class="av">س<small class="dot"></small></div><div class="nm">سارة</div><div class="r">❤️</div></div>
+        <div class="online-row"><div class="av">خ<small class="dot"></small></div><div class="nm">خنجر يماني</div><div class="r">❤️</div></div>
+      </div>
+      <h4 style="color:var(--primary);margin-bottom:10px">الإشعارات</h4>
+      <div class="online-list">
+        <div class="online-row"><div class="av">👥</div><div class="nm">هيبة ملك قبل طلب صداقتك</div><div class="r">✅</div></div>
+        <div class="online-row"><div class="av">🔇</div><div class="nm">تم كتمك في غرفة اليمن — 5 دقائق</div><div class="r" style="color:var(--accent)">⛔</div></div>
+        <div class="online-row"><div class="av">📢</div><div class="nm">منشور جديد لـ أحمد في حائط الأصدقاء</div><div class="r">📰</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     REPORTS LIST (admin)
+     ============================================ -->
+<div class="modal-bg" id="modalPm">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>📭 البلاغات <span style="font-size:11px;color:var(--text-muted)">(للإدارة)</span></h3>
+      <button class="modal-close" onclick="closeModal('modalPm')">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="online-list">
+        <div class="online-row" style="background:rgba(231,76,60,.1);border-radius:8px;padding:10px">
+          <div class="av" style="background:linear-gradient(135deg,#e74c3c,#c0392b)">!</div>
+          <div>
+            <div class="nm">بلاغ ضد: عضو_مسيء</div>
+            <div style="font-size:12px;color:var(--text-muted)">إساءة لفظية — 19/07/2026 14:22</div>
+          </div>
+          <div><button class="btn btn-primary" style="padding:6px 10px;font-size:12px">فحص</button></div>
+        </div>
+        <div class="online-row" style="background:rgba(52,152,219,.1);border-radius:8px;padding:10px">
+          <div class="av" style="background:linear-gradient(135deg,#3498db,#2980b9)">!</div>
+          <div>
+            <div class="nm">بلاغ ضد: سبام_2026</div>
+            <div style="font-size:12px;color:var(--text-muted)">محتوى احتيال — 19/07/2026 09:11</div>
+          </div>
+          <div><button class="btn btn-primary" style="padding:6px 10px;font-size:12px">فحص</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     STORE
+     ============================================ -->
+<div class="modal-bg" id="modalStore">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🛒 المتجر — شراء الرتب</h3>
+      <button class="modal-close" onclick="closeModal('modalStore')">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="store-grid">
+        <div class="store-card">
+          <div style="font-size:44px">💎</div>
+          <div class="name">شراء مميز</div>
+          <div class="price">500 <span class="currency">💲</span></div>
+          <ul style="text-align:right;font-size:13px;color:var(--text-muted);padding-right:18px;margin-bottom:14px">
+            <li>رفع صور بروفايل وحائط</li>
+            <li>إرسال صور ويوتيوب</li>
+            <li>تغيير لون وحجم الاسم</li>
+            <li>التحكم بالخاص</li>
+          </ul>
+          <button class="btn btn-primary" style="width:100%;justify-content:center">شراء الآن</button>
+        </div>
+        <div class="store-card" style="opacity:.85">
+          <div style="font-size:44px">🛡️</div>
+          <div class="name">شراء مشرف</div>
+          <div class="price">150000 <span class="currency">💲</span></div>
+          <ul style="text-align:right;font-size:13px;color:var(--text-muted);padding-right:18px;margin-bottom:14px">
+            <li>كل صلاحيات المميز</li>
+            <li>كتم 2-10 دقائق</li>
+            <li>طرد 2 دقيقة - ساعة</li>
+            <li>حذف رسائل مسيئة</li>
+          </ul>
+          <button class="btn btn-info" style="width:100%;justify-content:center">شراء الآن (بموافقة المالك)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     NEWS
+     ============================================ -->
+<div class="modal-bg" id="modalNews">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>📰 الأخبار</h3>
+      <button class="modal-close" onclick="closeModal('modalNews')">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="news-feed">
+        <div class="news-item">
+          <div class="head"><div class="av-sm">★</div><div><div class="author">إدارة الموقع</div><div class="time">20/07/2026 — 10:30</div></div></div>
+          <div class="body">🎉 نرحب بجميع الأعضاء الجدد، يرجى الالتزام بسياسة الموقع والاستمتاع بتجربة دردشة ممتعة وآمنة.</div>
+          <div class="reactions"><span>👍 12</span><span>❤️ 25</span><span>😂 3</span><span>🚫</span></div>
+          <input type="text" placeholder="💬 اكتب تعليقاً..." style="width:100%;margin-top:10px;background:var(--bg-1);border:1px solid var(--border);padding:8px 12px;border-radius:20px;color:var(--text)"/>
+        </div>
+        <div class="news-item">
+          <div class="head"><div class="av-sm">★</div><div><div class="author">إدارة الموقع</div><div class="time">18/07/2026 — 16:00</div></div></div>
+          <div class="body">🔒 تحديثات أمنية جديدة: تم تفعيل نظام التشفير الجديد للرسائل الخاصة.</div>
+          <div class="reactions"><span>👍 8</span><span>❤️ 11</span><span>🚫</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     SETTINGS (account)
+     ============================================ -->
+<div class="modal-bg" id="modalSettings">
+  <div class="modal modal-lg">
+    <div class="modal-head">
+      <h3>⚙️ إعدادات حسابي</h3>
+      <button class="modal-close" onclick="closeModal('modalSettings')">✖</button>
+    </div>
+    <div class="modal-body">
+      <h4 style="color:var(--primary);margin-bottom:10px">تخصيص</h4>
+      <div class="row">
+        <button class="btn btn-ghost" onclick="alert('تعديل البيانات')">📇 تحرير البيانات</button>
+        <button class="btn btn-ghost" onclick="alert('تعديل النبذة')">❓ تحرير معلوماتي</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-ghost" data-roles="vip,mod,admin,super,owner" onclick="alert('تغيير اسم المستخدم')">✏️ تغيير اسم المستخدم</button>
+        <button class="btn btn-ghost" data-roles="vip,mod,admin,super,owner" onclick="alert('تغيير لون الاسم')">🎨 لون الاسم</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn btn-ghost" onclick="alert('تعديل الحالة')">✏️ تعديل الحالة</button>
+      </div>
+
+      <h4 style="color:var(--primary);margin:18px 0 10px">خصوصية الخاص</h4>
+      <div class="field">
+        <label>من يستطيع مراسلتي؟</label>
+        <select id="privSelect">
+          <option value="all">للجميع</option>
+          <option value="members">للأعضاء فقط</option>
+          <option value="friends">للأصدقاء فقط</option>
+          <option value="none">إيقاف عن الكل</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="showToast('تم حفظ الخصوصية')">حفظ</button>
+
+      <h4 style="color:var(--primary);margin:18px 0 10px">عامة</h4>
+      <div class="field"><label>المنطقة الزمنية</label><select><option>Asia/Aden</option><option>Asia/Riyadh</option><option>Africa/Cairo</option></select></div>
+      <div class="field"><label>البلد / المنطقة</label><select><option>اليمن — عدن</option><option>السعودية — الرياض</option><option>مصر — القاهرة</option></select></div>
+      <div class="field"><label>لغة الموقع</label><select><option>العربية</option><option>English</option></select></div>
+
+      <h4 style="color:var(--accent);margin:18px 0 10px">الأمان</h4>
+      <div class="field"><label>كلمة المرور القديمة</label><input type="password"/></div>
+      <div class="row"><div class="field"><label>الجديدة</label><input type="password"/></div><div class="field"><label>التأكيد</label><input type="password"/></div></div>
+      <div class="row"><button class="btn btn-info" onclick="showToast('تم تغيير الباسورد')">🔒 تغيير الباسورد</button></div>
+      <div class="row" style="margin-top:8px"><button class="btn btn-danger" onclick="if(confirm('تأكيد حذف العضوية نهائياً؟'))logout()">🗑️ حذف العضوية</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     ADMIN CONTROL (placeholder)
+     ============================================ -->
+<div class="modal-bg" id="modalAdmin">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>⚙️ لوحة التحكم</h3>
+      <button class="modal-close" onclick="closeModal('modalAdmin')">✖</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-muted);margin-bottom:14px">إدارة الأعضاء • الكتم • الأخبار • إعدادات الموقع</p>
+      <div class="row"><button class="btn btn-ghost" onclick="alert('إدارة الأعضاء')">👥 إدارة الأعضاء</button></div>
+      <div class="row" style="margin-top:8px"><button class="btn btn-ghost" onclick="alert('أداة الكتم')">🔇 إدارة الكتم/الطرد</button></div>
+      <div class="row" style="margin-top:8px"><button class="btn btn-ghost" onclick="alert('نشر خبر')">📰 نشر خبر</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     BUY CREDIT
+     ============================================ -->
+<div class="modal-bg" id="modalCredit">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>💳 شراء الرصيد</h3>
+      <button class="modal-close" onclick="closeModal('modalCredit')">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="field"><label>الباقة</label>
+        <select>
+          <option>100,000 رصيد 💵 — 100$</option>
+          <option>50,000 رصيد 💵 — 55$</option>
+          <option>10,000 رصيد 💵 — 12$</option>
+          <option>1,000 رصيد 💵 — 2$</option>
+        </select>
+      </div>
+      <div class="field"><label>وسيلة الدفع</label>
+        <select>
+          <option>محفظة الكريمي</option>
+          <option>موني جرام</option>
+          <option>USDT-TRC20</option>
+          <option>Payeer</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showToast('تم إرسال طلب الدفع - بانتظار التأكيد')">شراء الآن</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     BAN LIST
+     ============================================ -->
+<div class="modal-bg" id="modalBan">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>🚫 قائمة الحظر <span style="font-size:11px;color:var(--text-muted)">(للمالك)</span></h3>
+      <button class="modal-close" onclick="closeModal('modalBan')">✖</button>
+    </div>
+    <div class="modal-body">
+      <div class="online-list">
+        <div class="online-row" style="background:rgba(231,76,60,.1);padding:10px;border-radius:8px">
+          <div class="av" style="background:#e74c3c">!</div>
+          <div><div class="nm">سبام_2026</div><div style="font-size:11px;color:var(--text-muted)">حظر دائم — 17/07/2026</div></div>
+          <div><button class="btn btn-info" style="padding:6px 10px;font-size:12px">رفع الحظر</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================
+     POPOVER (click on user)
+     ============================================ -->
+<div class="popover" id="userPopover">
+  <div class="popover-head">
+    <div class="av" id="popAv">أ</div>
+    <div>
+      <div class="nm" id="popName">أحمد</div>
+      <div class="info" id="popInfo">26 — ذكر — 🇾🇪</div>
+    </div>
+  </div>
+  <div class="popover-actions">
+    <button onclick="closePopover();openModal('modalProfile')"><span>👤</span> عرض الملف الشخصي</button>
+    <button onclick="closePopover();alert('فتح الخاص')"><span>💬</span> رسالة</button>
+    <button data-roles="mod,admin,super,owner" onclick="closePopover();alert('فتح الأمر')"><span>⚡</span> الأمر</button>
+    <button onclick="closePopover();alert('تم الإبلاغ');" class="danger"><span>🚩</span> إبلاغ</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">تم بنجاح</div>
+
+<script>
+/* ============================================
+   STATE / MOCKS
+   ============================================ */
+const HERO_IMAGES = [
+  {url:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/Old_City_of_Sanaa.jpg/1280px-Old_City_of_Sanaa.jpg', label:'صنعاء القديمة — UNESCO'},
+  {url:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c4/Shibam_Hadramaut.jpg/1280px-Shibam_Hadramaut.jpg', label:'شبام حضرموت — Manhattan of the Desert'},
+  {url:'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Dar_al-Hajar_01.jpg/1024px-Dar_al-Hajar_01.jpg', label:'دار الحجر — وادي ظهر'}
+];
+let heroIdx = 0;
+
+const ROLES = {
+  guest:'زائر', member:'عضو', vip:'💎 مميز',
+  mod:'🛡️ مشرف', admin:'☆ إدارة', super:'⭐ ادمن', owner:'👑 المالك'
+};
+
+let state = {
+  role:'guest',
+  name:'زائر',
+  room:'global',
+  status:'online',
+  likes:0,
+  friends:[],
+  gender:'',country:'',age:''
+};
+
+const MOCK_USERS = [
+  {name:'أحمد السعيد', age:28, gender:'ذكر', country:'🇾🇪', role:'member', likes:12},
+  {name:'سارة', age:24, gender:'أنثى', country:'🇸🇦', role:'vip', likes:34},
+  {name:'خنجر يماني', age:32, gender:'ذكر', country:'🇾🇪', role:'mod', likes:88},
+  {name:'فاطمة الزهراء', age:22, gender:'أنثى', country:'🇪🇬', role:'member', likes:14},
+  {name:'عمر الحضرمي', age:30, gender:'ذكر', country:'🇾🇪', role:'admin', likes:120},
+  {name:'نورة', age:27, gender:'أنثى', country:'🇰🇼', role:'vip', likes:55},
+  {name:'محمد الجزائري', age:35, gender:'ذكر', country:'🇩🇿', role:'member', likes:8},
+  {name:'ميرا', age:21, gender:'أنثى', country:'🇲🇦', role:'member', likes:15},
+  {name:'يوسف الصنعاني', age:40, gender:'ذكر', country:'🇾🇪', role:'owner', likes:999},
+  {name:'مريم', age:19, gender:'أنثى', country:'🇪🇬', role:'guest', likes:0}
+];
+
+const FRIEND_REQUESTS = [
+  {name:'هيبة ملك', country:'🇾🇪', role:'vip'},
+  {name:'خنجر يماني', country:'🇾🇪', role:'mod'},
+  {name:'محمد الموصلي', country:'🇮🇶', role:'member'}
+];
+
+const PM_LIST = [
+  {name:'سارة', last:'وعليكم السلام كيفك؟', time:'17:18', unread:true},
+  {name:'أحمد', last:'صباح الخير', time:'09:55', unread:false},
+  {name:'يوسف', last:'وصلتني الرسالة', time:'أمس', unread:false}
+];
+
+const ROOMS = [
+  {flag:'🌎', name:'غرفة العامة', desc:'دردشة لكل العرب', online:128, id:'global'},
+  {flag:'🇾🇪', name:'غرفة اليمن', desc:'أهل اليمن وتاريخهم العريق', online:64, id:'yemen'},
+  {flag:'🇩🇿', name:'غرفة الجزائر', desc:'أهل الجزائر', online:23, id:'algeria'},
+  {flag:'🇪🇬', name:'غرفة مصر', desc:'أهل الكنانة', online:42, id:'egypt'},
+  {flag:'🇸🇦', name:'غرفة السعودية', desc:'أهل المملكة', online:51, id:'saudi'}
+];
+
+const SEED_MSGS = [
+  {u:'أحمد السعيد', t:'17:15', m:'السلام عليكم ورحمة الله', sys:false, premium:false},
+  {u:'سارة', t:'17:16', m:'وعليكم السلام 😊 الله يسعدك', sys:false, premium:true},
+  {u:'', t:'', m:'— سارة أصبحت 💎 مميز —', sys:true, premium:false},
+  {u:'خنجر يماني', t:'17:18', m:'كيف الحال يا شباب؟', sys:false, premium:false},
+  {u:'فاطمة الزهراء', t:'17:19', m:'الجو ممتاز والحمد لله', sys:false, premium:false}
+];
+
+/* ============================================
+   UTILITIES
+   ============================================ */
+function $(id){return document.getElementById(id)}
+function openModal(id){$(id).classList.add('show')}
+function closeModal(id){$(id).classList.remove('show')}
+function showToast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+/* ============================================
+   HERO SLIDER
+   ============================================ */
+function rotateHero(){
+  const slides=document.querySelectorAll('#heroSlides img');
+  slides[heroIdx].classList.remove('active');
+  heroIdx=(heroIdx+1)%slides.length;
+  slides[heroIdx].classList.add('active');
+  $('heroMainImg').src = HERO_IMAGES[heroIdx].url;
+  $('cityLabel').textContent = HERO_IMAGES[heroIdx].label;
+}
+setInterval(rotateHero, 5000);
+
+/* ============================================
+   LOGIN FLOW
+   ============================================ */
+function openLogin(mode){
+  $('loginTitle').textContent = mode==='register'?'إنشاء حساب جديد':(mode==='member'?'دخول الأعضاء':'دخول الزوار');
+  switchLogin(mode, document.querySelector(`.login-tabs button[data-mode="${mode}"]`));
+  openModal('modalLogin');
+}
+function switchLogin(mode, btn){
+  document.querySelectorAll('.login-tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  $('nameRow').style.display = (mode==='guest'||mode==='register')?'block':'none';
+  $('emailRow').style.display = (mode==='member'||mode==='register')?'block':'none';
+  $('passRow').style.display = (mode==='member'||mode==='register')?'block':'none';
+  $('guestNotice').style.display = (mode==='guest')?'block':'none';
+}
+function submitLogin(){
+  closeModal('modalLogin');
+  const mode = document.querySelector('.login-tabs button.active').dataset.mode;
+  if(mode==='guest'){ state.role='guest'; state.name='زائر_' + Math.floor(Math.random()*999);}
+  else if(mode==='member'){ state.role='member'; state.name='عضو_' + Math.floor(Math.random()*999);}
+  else { state.role='vip'; state.name='جديد_' + Math.floor(Math.random()*999);}
+  enterApp();
+}
+
+/* ============================================
+   APP TRANSITION
+   ============================================ */
+function enterApp(){
+  $('landing').style.display='none';
+  $('app').classList.add('show');
+  document.body.style.background='var(--bg-0)';
+  // Update UI
+  $('topName').textContent = state.name;
+  $('topRole').textContent = ROLES[state.role];
+  $('topAvatar').textContent = state.name[0];
+  applyRolePermissions();
+  renderMessages();
+  renderOnline();
+  renderFriends();
+  renderPM();
+  renderRoomsList();
+}
+function showLanding(){
+  $('landing').style.display='block';
+  $('app').classList.remove('show');
+  document.body.style.overflowY='auto';
+}
+function logout(){
+  showToast('تم تسجيل الخروج');
+  state.role='guest';
+  state.likes=0;
+  showLanding();
+}
+
+/* ============================================
+   ROLE-BASED PERMISSIONS
+   ============================================ */
+function applyRolePermissions(){
+  document.querySelectorAll('[data-roles]').forEach(el=>{
+    const allowed = el.dataset.roles.split(',');
+    el.style.display = allowed.includes(state.role) ? '' : 'none';
+  });
+}
+
+/* ============================================
+   MESSAGES
+   ============================================ */
+function renderMessages(){
+  const c = $('messages');
+  c.innerHTML = '';
+  SEED_MSGS.forEach(m=>c.appendChild(buildMsg(m)));
+  c.scrollTop = c.scrollHeight;
+}
+function buildMsg(m){
+  const div = document.createElement('div');
+  div.className='msg' + (m.sys?' sys':'') + (m.premium?' premium':'');
+  if(m.sys){
+    div.innerHTML = `<div class="msg-content">${m.m}</div>`;
+  } else {
+    div.innerHTML = `
+      <div class="msg-avatar">${m.u[0]}</div>
+      <div class="msg-content">
+        <div class="msg-head">
+          <span class="msg-name" onclick="mentionUser('${m.u}')">${m.u}</span>
+          <span class="msg-time">${m.t} 16/06</span>
+        </div>
+        <div class="msg-text">${m.m}</div>
+        <div class="msg-actions">
+          <button onclick="openPopover(event, '${m.u}', 26, 'ذكر', '🇾🇪')">••• إبلاغ</button>
+          <button onclick="likeMsg(this)">❤️ 0</button>
+          <button onclick="replyMsg('${m.u}')">💬 رد</button>
+        </div>
+      </div>
+    `;
+  }
+  return div;
+}
+function sendMessage(){
+  const inp = $('msgInput');
+  const txt = inp.value.trim();
+  if(!txt) return;
+  const now = new Date();
+  const t = now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
+  const msg = {u: state.name, t, m: txt.replace(/</g,'&lt;')};
+  const el = buildMsg(msg);
+  el.style.opacity='0';
+  $('messages').appendChild(el);
+  requestAnimationFrame(()=>{ el.style.transition='.3s'; el.style.opacity='1'; });
+  $('messages').scrollTop=$('messages'].scrollHeight;
+  inp.value='';
+  // Auto-reply after 1.5s for demo
+  if(Math.random()>0.4){
+    setTimeout(()=>{
+      const r = MOCK_USERS[Math.floor(Math.random()*MOCK_USERS.length)];
+      const reply = {u:r.name, t, m:['أهلاً بك','كيفك؟','😊 تمام','نرحب بك','حياك الله'][Math.floor(Math.random()*5)], premium: r.role==='vip'};
+      const e2 = buildMsg(reply);
+      $('messages').appendChild(e2);
+      $('messages'].scrollTop=$('messages'].scrollHeight;
+      showToast('رسالة جديدة من '+r.name);
+    },1400);
+  }
+}
+function likeMsg(btn){
+  btn.style.color = btn.style.color==='rgb(231, 76, 60)'?'#9aa3b2':'#e74c3c';
+  state.likes++;
+}
+function replyMsg(u){
+  $('msgInput').value = '@'+u+' ';
+  $('msgInput').focus();
+}
+function mentionUser(u){
+  $('msgInput').value = u+' ';
+  $('msgInput').focus();
+}
+
+/* ============================================
+   POPOVER (click username or avatar)
+   ============================================ */
+function openPopover(e, name, age, gender, country){
+  e.stopPropagation();
+  $('popName').textContent = name;
+  $('popAv').textContent = name[0];
+  $('popInfo').textContent = age+' — '+gender+' — '+country;
+  const p = $('userPopover');
+  p.classList.add('show');
+  const r = e.target.getBoundingClientRect();
+  p.style.top = Math.min(window.innerHeight-260, r.bottom+8)+'px';
+  if(r.left < window.innerWidth/2){
+    p.style.right = (window.innerWidth - r.right)+'px';
+    p.style.left = 'auto';
+  } else {
+    p.style.left = (window.innerWidth - r.left)+'px';
+    p.style.right = 'auto';
+  }
+  applyRolePermissions();
+}
+function closePopover(){$('userPopover').classList.remove('show')}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.popover') && !e.target.closest('[onclick*="openPopover"]'))
+    closePopover();
+});
+
+/* ============================================
+   ONLINE LIST
+   ============================================ */
+function renderOnline(){
+  const c = $('onlineList'); c.innerHTML='';
+  const sorted = [...MOCK_USERS].sort((a,b)=>{
+    const order=['owner','super','admin','mod','vip','member','guest'];
+    return order.indexOf(a.role)-order.indexOf(b.role);
+  });
+  sorted.forEach(u=>{
+    const row = document.createElement('div');
+    row.className='online-row';
+    row.dataset.search=u.name;
+    row.innerHTML = `
+      <div class="av">${u.name[0]}<span class="dot"></span></div>
+      <div class="nm">${u.name}</div>
+      <div class="r">${ROLES[u.role]}</div>
+    `;
+    row.onclick = e=>openPopover(e, u.name, u.age, u.gender, u.country);
+    c.appendChild(row);
+  });
+}
+function filterOnline(){
+  const q = $('onlineSearch').value.toLowerCase();
+  document.querySelectorAll('#onlineList .online-row').forEach(r=>{
+    r.style.display = r.dataset.search.toLowerCase().includes(q)?'flex':'none';
+  });
+}
+
+/* ============================================
+   FRIENDS
+   ============================================ */
+function renderFriends(){
+  const c=$('friendsContainer'); c.innerHTML='';
+  FRIEND_REQUESTS.forEach((f,i)=>{
+    const row = document.createElement('div');
+    row.className='friend-req';
+    row.innerHTML = `
+      <div class="av">${f.name[0]}</div>
+      <div class="nm">${f.country} ${f.name} <div style="font-size:11px;color:var(--text-muted)">${ROLES[f.role]}</div></div>
+      <div class="btns">
+        <button class="accept-btn" onclick="acceptFriend(${i})">✅ قبول</button>
+        <button class="reject-btn" onclick="rejectFriend(${i})">❌ رفض</button>
+      </div>
+    `;
+    c.appendChild(row);
+  });
+}
+function acceptFriend(i){showToast('تم قبول طلب '+FRIEND_REQUESTS[i].name);FRIEND_REQUESTS.splice(i,1);renderFriends()}
+function rejectFriend(i){showToast('تم رفض طلب '+FRIEND_REQUESTS[i].name);FRIEND_REQUESTS.splice(i,1);renderFriends()}
+
+/* ============================================
+   PRIVATE MESSAGES
+   ============================================ */
+function renderPM(){
+  const c=$('pmList'); c.innerHTML='';
+  PM_LIST.forEach(p=>{
+    const row = document.createElement('div');
+    row.className='pm'+(p.unread?' unread':'');
+    row.innerHTML = `
+      <div class="av" style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700">${p.name[0]}</div>
+      <div style="flex:1">
+        <div style="font-weight:700">${p.name}</div>
+        <div style="font-size:12px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.last}</div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);text-align:left">${p.time}</div>
+    `;
+    row.onclick = ()=>alert('فتح محادثة مع '+p.name);
+    c.appendChild(row);
+  });
+}
+
+/* ============================================
+   ROOMS LIST INSIDE MODAL + APP SWITCH
+   ============================================ */
+function renderRoomsList(){
+  const c=$('roomsListContainer'); c.innerHTML='<h2 class="rooms-list-title">اختر غرفتك</h2>';
+  ROOMS.forEach(r=>{
+    const d = document.createElement('div');
+    d.className='room-card';
+    d.innerHTML=`
+      <div class="room-flag">${r.flag}</div>
+      <div class="room-info2">
+        <div class="nm">${r.name}</div>
+        <div class="desc">${r.desc}</div>
+        <div class="online">🟢 ${r.online} متصل</div>
+      </div>
+      <button class="room-enter" onclick="switchRoom('${r.id}','${r.name}','${r.flag}')">اضغط هنا للدخول</button>
+    `;
+    c.appendChild(d);
+  });
+}
+function switchRoom(id,name,flag){
+  state.room=id;
+  $('roomTitle').textContent = name;
+  $('roomFlag').textContent = flag;
+  $('bbRoom').textContent = name;
+  closeModal('modalRooms');
+  showToast('تم الانتقال إلى '+name);
+}
+
+/* ============================================
+   SIDEBAR
+   ============================================ */
+function toggleSidebar(){$('sidebar').classList.toggle('open')}
+
+/* ============================================
+   STATUS
+   ============================================ */
+document.querySelectorAll('.status-pill').forEach(p=>{
+  p.onclick=()=>{
+    document.querySelectorAll('.status-pill').forEach(x=>x.classList.remove('active'));
+    p.classList.add('active');
+    state.status = p.dataset.s;
+    showToast('الحالة: '+p.textContent);
+  };
+});
+
+/* ============================================
+   PROFILE
+   ============================================ */
+function openProfileMe(){
+  openModal('modalProfile');
+  $('pfName').firstChild.textContent = state.name+' ';
+  $('pfRole').textContent = ROLES[state.role];
+  $('pfAv').textContent = state.name[0];
+  applyRolePermissions();
+}
+function switchProfTab(t, btn){
+  document.querySelectorAll('.profile-tabs button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['info','friends','meta'].forEach(x=>$(`pt${x[0].toUpperCase()+x.slice(1)}`).style.display='none');
+  $('pt'+t[0].toUpperCase()+t.slice(1)).style.display='block';
+}
+
+/* ============================================
+   init
+   ============================================ */
+document.addEventListener('DOMContentLoaded', ()=>{
+  applyRolePermissions();
+  renderOnline();
+  renderFriends();
+  renderPM();
+  renderRoomsList();
+});￵￵￵￵
+</script>
+</body￵￵￵￵>
+</html>
