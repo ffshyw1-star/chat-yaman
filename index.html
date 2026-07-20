@@ -1768,6 +1768,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
   renderPM();
   renderRoomsList();
 });￵￵￵￵
+<script src="/chat-client.js"></script>
+<script>
+  // عند الضغط على زر "دخول الأعضاء":
+  YemenChat.login('عضو_تجريبي', 'member', '🇾🇪')
+    .then(() => YemenChat.joinRoom('global'));
+</script>
+
 </script>
 </body￵￵￵￵>
 </html>
