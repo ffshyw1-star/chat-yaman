@@ -480,3 +480,1415 @@ tbody tr:last-child{border-bottom:none}
   border-radius:8px;cursor:pointer;transition:.2s;white-space:nowrap;
   font-weight:600;
 }
+.tab.active{background:var(--primary);color:#0a0d15}
+.tab:hover:not(.active){background:var(--bg-3);color:var(--text)}
+
+/* ===== Modal ===== */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);
+  display:none;align-items:center;justify-content:center;
+  z-index:200;backdrop-filter:blur(6px);padding:20px;
+}
+.modal-bg.show{display:flex;animation:fadePage .2s}
+.modal{
+  background:var(--bg-1);border:1px solid var(--border);
+  border-radius:var(--radius);width:100%;max-width:560px;
+  max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);
+}
+.modal.lg{max-width:780px}
+.modal .m-head{
+  padding:16px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:var(--bg-1);z-index:2;
+}
+.modal .m-head h3{font-size:17px;color:var(--primary)}
+.modal .m-body{padding:20px}
+.modal-close{
+  width:32px;height:32px;border-radius:50%;
+  background:var(--bg-2);display:flex;align-items:center;justify-content:center;
+  font-size:18px;transition:.15s;
+}
+.modal-close:hover{background:var(--accent);color:#fff}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:13px;color:var(--text-muted);margin-bottom:6px}
+.field input,.field textarea,.field select{
+  width:100%;background:var(--bg-2);border:1px solid var(--border);
+  padding:10px 12px;border-radius:10px;color:var(--text);font-size:14px;
+  font-family:inherit;
+}
+.row2{display:flex;gap:10px}
+.row2>.field{flex:1}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ===== Toast ===== */
+.toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+  background:var(--primary);color:#0a0d15;padding:12px 22px;
+  border-radius:30px;font-weight:600;font-size:14px;
+  box-shadow:var(--shadow);z-index:300;opacity:0;
+  transition:.3s;pointer-events:none;
+}
+.toast.show{opacity:1;transform:translate(-50%,-10px)}
+.toast.danger{background:var(--danger);color:#fff}
+.toast.success{background:var(--success);color:#fff}
+
+/* ===== Responsive ===== */
+@media (max-width: 980px){
+  .charts-row{grid-template-columns:1fr}
+}
+@media (max-width: 768px){
+  .sidebar-admin{position:fixed;right:0;top:0;z-index:50;height:100vh;transform:translateX(100%);transition:transform .3s}
+  .sidebar-admin.open{transform:translateX(0)}
+  .topbar .menu-btn{display:flex}
+  .topbar .search{display:none}
+  .content{padding:16px}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+}
+@media (max-width: 480px){
+  .stats-grid{grid-template-columns:1fr}
+  .topbar{padding:10px 14px}
+  .topbar h1{font-size:16px}
+  th,td{padding:10px;font-size:12px}
+  .modal .m-body{padding:14px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== AUTH GATE ===== -->
+<div class="auth-gate" id="authGate">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <span class="crown">👑</span>
+      <h1>لوحة تحكم المالك</h1>
+      <p>شات اليمن المطور — دخول خاص</p>
+    </div>
+    <div class="auth-captcha" id="captchaBox">AB7K9</div>
+    <div class="field">
+      <label>اسم المستخدم (المالك)</label>
+      <input type="text" id="ownerUser" placeholder="owner_admin" value="owner_admin">
+    </div>
+    <div class="field">
+      <label>كلمة المرور</label>
+      <input type="password" id="ownerPass" placeholder="••••••••" value="********">
+    </div>
+    <div class="field">
+      <label>كود التحقق</label>
+      <input type="text" id="captchaInput" placeholder="أدخل الكود بالأعلى">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:12px" onclick="auth()">
+      <span>🔓</span><span>دخول لوحة التحكم</span>
+    </button>
+    <p style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:14px">
+      🔒 محمي بنظام التحقق الثنائي — جميع محاولات الدخول تُسجَّل
+    </p>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div class="app hidden" id="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar-admin" id="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo">
+        <div class="sb-logo-c">👑</div>
+        <div>
+          <h2>لوحة المالك</h2>
+          <p>شات اليمن المطور</p>
+        </div>
+      </div>
+      <div class="sb-credit">
+        <span>رصيدك كمالك</span>
+        <strong>∞ غير محدود</strong>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-section">الرئيسية</div>
+      <div class="sb-link active" data-page="dashboard" onclick="goPage('dashboard', this)">
+        <span class="ic">📊</span><span>الإحصائيات</span>
+      </div>
+      <div class="sb-link" data-page="users" onclick="goPage('users', this)">
+        <span class="ic">👥</span><span>إدارة الأعضاء</span>
+        <span class="badge">2</span>
+      </div>
+      <div class="sb-link" data-page="rooms" onclick="goPage('rooms', this)">
+        <span class="ic">🏠</span><span>الغرف</span>
+      </div>
+
+      <div class="sb-section">الرقابة</div>
+      <div class="sb-link" data-page="moderation" onclick="goPage('moderation', this)">
+        <span class="ic">🚩</span><span>البلاغات</span>
+        <span class="badge">5</span>
+      </div>
+      <div class="sb-link" data-page="bans" onclick="goPage('bans', this)">
+        <span class="ic">🚫</span><span>قائمة الحظر</span>
+      </div>
+      <div class="sb-link" data-page="logs" onclick="goPage('logs', this)">
+        <span class="ic">📜</span><span>سجل النشاط</span>
+      </div>
+
+      <div class="sb-section">المحتوى</div>
+      <div class="sb-link" data-page="news" onclick="goPage('news', this)">
+        <span class="ic">📰</span><span>الأخبار والمنشورات</span>
+      </div>
+      <div class="sb-link" data-page="store" onclick="goPage('store', this)">
+        <span class="ic">🛒</span><span>المتجر والأسعار</span>
+      </div>
+
+      <div class="sb-section">الإعدادات</div>
+      <div class="sb-link" data-page="settings" onclick="goPage('settings', this)">
+        <span class="ic">⚙️</span><span>إعدادات الموقع</span>
+      </div>
+      <div class="sb-link" data-page="security" onclick="goPage('security', this)">
+        <span class="ic">🛡️</span><span>الأمان</span>
+      </div>
+    </nav>
+    <div class="sb-foot">
+      <div class="user-info">
+        <div class="av">م</div>
+        <div>
+          <div class="nm">المالك</div>
+          <div class="rl">👑 أعلى الصلاحيات</div>
+        </div>
+      </div>
+      <button class="btn btn-danger btn-sm" style="width:100%;justify-content:center;margin-top:10px" onclick="logout()">
+        🚪 خروج
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <header class="topbar">
+      <button class="menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+      <div>
+        <h1 id="pageTitle">الإحصائيات</h1>
+        <div class="breadcrumb" id="pageBread">لوحة المالك ← الرئيسية ← الإحصائيات</div>
+      </div>
+      <div class="search">
+        <span>🔍</span>
+        <input type="text" placeholder="بحث سريع في لوحة التحكم...">
+      </div>
+      <div class="bell" onclick="showToast('لديك 5 بلاغات و3 إشعارات جديدة')">
+        🔔<span class="dot"></span>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- ===== DASHBOARD ===== -->
+      <section class="page active" id="pg-dashboard">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon gold">👥</div>
+            <div class="stat-value">1,847</div>
+            <div class="stat-label">إجمالي الأعضاء</div>
+            <span class="stat-trend up">↑ +24 اليوم</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">🟢</div>
+            <div class="stat-value">328</div>
+            <div class="stat-label">المتصلون الآن</div>
+            <span class="stat-trend up">↑ +12%</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue">💬</div>
+            <div class="stat-value">12,450</div>
+            <div class="stat-label">رسائل اليوم</div>
+            <span class="stat-trend up">↑ +8%</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">🚩</div>
+            <div class="stat-value">5</div>
+            <div class="stat-label">بلاغات معلقة</div>
+            <span class="stat-trend down">↓ يحتاج مراجعة</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">💰</div>
+            <div class="stat-value">$2,340</div>
+            <div class="stat-label">إيرادات اليوم</div>
+            <span class="stat-trend up">↑ +15%</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon gold">💎</div>
+            <div class="stat-value">47</div>
+            <div class="stat-label">اشتراكات مميز نشطة</div>
+            <span class="stat-trend up">↑ +3</span>
+          </div>
+        </div>
+
+        <div class="charts-row">
+          <div class="chart-card">
+            <div class="chart-head">
+              <h3>📈 نشاط الرسائل الأسبوعي</h3>
+              <div class="period-tabs">
+                <div class="period-tab">يوم</div>
+                <div class="period-tab active">أسبوع</div>
+                <div class="period-tab">شهر</div>
+              </div>
+            </div>
+            <div class="bars-chart" id="barsChart"></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-head">
+              <h3>🎯 توزيع الرتب</h3>
+            </div>
+            <div class="donut-wrap">
+              <div class="donut">
+                <div class="donut-val">
+                  <div class="big">1,847</div>
+                  <div class="small">عضو</div>
+                </div>
+              </div>
+              <div class="legend">
+                <div class="legend-row"><span class="legend-dot" style="background:var(--primary)"></span><span class="nm">مالك/ادمن</span><span class="vl">15</span></div>
+                <div class="legend-row"><span class="legend-dot" style="background:var(--accent)"></span><span class="nm">إدارة</span><span class="vl">28</span></div>
+                <div class="legend-row"><span class="legend-dot" style="background:var(--info)"></span><span class="nm">مشرف</span><span class="vl">54</span></div>
+                <div class="legend-row"><span class="legend-dot" style="background:var(--success)"></span><span class="nm">مميز</span><span class="vl">47</span></div>
+                <div class="legend-row"><span class="legend-dot" style="background:var(--text-dim)"></span><span class="nm">عضو عادي</span><span class="vl">1,703</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="chart-card" style="grid-column:span 2">
+            <div class="chart-head">
+              <h3>🌍 توزيع الأعضاء حسب الدولة</h3>
+            </div>
+            <div class="legend" style="font-size:14px">
+              <div class="legend-row" style="background:var(--bg-2);padding:10px;border-radius:8px">
+                <span style="font-size:20px">🇾🇪</span>
+                <span class="nm">اليمن</span>
+                <span class="vl" style="color:var(--primary)">892</span>
+                <div style="height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden;width:60%">
+                  <div style="width:48%;height:100%;background:var(--primary)"></div>
+                </div>
+              </div>
+              <div class="legend-row" style="background:var(--bg-2);padding:10px;border-radius:8px">
+                <span style="font-size:20px">🇸🇦</span>
+                <span class="nm">السعودية</span>
+                <span class="vl">412</span>
+                <div style="height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden;width:60%">
+                  <div style="width:22%;height:100%;background:var(--info)"></div>
+                </div>
+              </div>
+              <div class="legend-row" style="background:var(--bg-2);padding:10px;border-radius:8px">
+                <span style="font-size:20px">🇪🇬</span>
+                <span class="nm">مصر</span>
+                <span class="vl">238</span>
+                <div style="height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden;width:60%">
+                  <div style="width:12%;height:100%;background:var(--success)"></div>
+                </div>
+              </div>
+              <div class="legend-row" style="background:var(--bg-2);padding:10px;border-radius:8px">
+                <span style="font-size:20px">🇩🇿</span>
+                <span class="nm">الجزائر</span>
+                <span class="vl">156</span>
+                <div style="height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden;width:60%">
+                  <div style="width:8%;height:100%;background:var(--accent)"></div>
+                </div>
+              </div>
+              <div class="legend-row" style="background:var(--bg-2);padding:10px;border-radius:8px">
+                <span style="font-size:20px">🇲🇦</span>
+                <span class="nm">المغرب</span>
+                <span class="vl">98</span>
+                <div style="height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden;width:60%">
+                  <div style="width:5%;height:100%;background:var(--warn)"></div>
+                </div>
+              </div>
+              <div class="legend-row" style="background:var(--bg-2);padding:10px;border-radius:8px">
+                <span style="font-size:20px">🌍</span>
+                <span class="nm">دول أخرى</span>
+                <span class="vl">51</span>
+                <div style="height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden;width:60%">
+                  <div style="width:3%;height:100%;background:var(--text-dim)"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== USERS ===== -->
+      <section class="page" id="pg-users">
+        <div class="page-head">
+          <div>
+            <h2>👥 إدارة الأعضاء</h2>
+            <p>إجمالي: <strong id="usersCount">1,847</strong> عضو • المحدد: <strong id="selCount">0</strong></p>
+          </div>
+          <div class="page-actions">
+            <button class="btn" onclick="openModal('modalAddUser')">➕ إضافة عضو</button>
+            <button class="btn btn-info btn-sm" onclick="bulkAction('msg')">✉️ رسالة جماعية</button>
+            <button class="btn btn-warning btn-sm" onclick="bulkAction('mute')">🔇 كتم الكل</button>
+            <button class="btn btn-danger btn-sm" onclick="bulkAction('ban')">🚫 حظر</button>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab active" onclick="filterUsers('all', this)">الكل (1,847)</div>
+          <div class="tab" onclick="filterUsers('online', this)">🟢 متصل (328)</div>
+          <div class="tab" onclick="filterUsers('vip', this)">💎 مميز (47)</div>
+          <div class="tab" onclick="filterUsers('mod', this)">🛡️ مشرف (54)</div>
+          <div class="tab" onclick="filterUsers('admin', this)">☆ إدارة (28)</div>
+          <div class="tab" onclick="filterUsers('banned', this)">🚫 محظور (12)</div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <div class="search">
+              <span>🔍</span>
+              <input type="text" placeholder="ابحث بالاسم، البريد، أو IP..." id="userSearch" oninput="renderUsers()">
+            </div>
+            <select id="filterRole" onchange="renderUsers()">
+              <option value="">جميع الرتب</option>
+              <option>مالك</option>
+              <option>ادمن</option>
+              <option>إدارة</option>
+              <option>مشرف</option>
+              <option>مميز</option>
+              <option>عضو</option>
+              <option>زائر</option>
+            </select>
+            <select id="filterCountry" onchange="renderUsers()">
+              <option value="">كل الدول</option>
+              <option>🇾🇪 اليمن</option>
+              <option>🇸🇦 السعودية</option>
+              <option>🇪🇬 مصر</option>
+              <option>🇩🇿 الجزائر</option>
+            </select>
+            <select id="filterStatus" onchange="renderUsers()">
+              <option value="">كل الحالات</option>
+              <option>🟢 متصل</option>
+              <option>🟡 بعيد</option>
+              <option>🔴 مشغول</option>
+              <option>⚫ غير متصل</option>
+            </select>
+          </div>
+          <table id="usersTable">
+            <thead>
+              <tr>
+                <th style="width:30px"><input type="checkbox" class="tbl-check" onchange="toggleAll(this)"></th>
+                <th>العضو</th>
+                <th>الدور</th>
+                <th>الدولة</th>
+                <th>الحالة</th>
+                <th>الرصيد</th>
+                <th>انضم</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+          <div class="pagination">
+            <span>عرض 1-10 من 1,847</span>
+            <div class="pages">
+              <div class="pg-btn">‹</div>
+              <div class="pg-btn active">1</div>
+              <div class="pg-btn">2</div>
+              <div class="pg-btn">3</div>
+              <div class="pg-btn">…</div>
+              <div class="pg-btn">185</div>
+              <div class="pg-btn">›</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== ROOMS ===== -->
+      <section class="page" id="pg-rooms">
+        <div class="page-head">
+          <div>
+            <h2>🏠 إدارة الغرف</h2>
+            <p>إنشاء وتعديل الغرف وتعيين المراقبين</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-primary" onclick="alert('إنشاء غرفة جديدة')">➕ غرفة جديدة</button>
+          </div>
+        </div>
+        <div class="room-grid" id="roomsGrid"></div>
+      </section>
+
+      <!-- ===== MODERATION ===== -->
+      <section class="page" id="pg-moderation">
+        <div class="page-head">
+          <div>
+            <h2>🚩 مراجعة البلاغات</h2>
+            <p>5 بلاغات معلقة تحتاج مراجعة</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-info btn-sm" onclick="showToast('تم وضع علامة "بالمراجعة"')">⏳ مراجعة الكل</button>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab active">الكل (5)</div>
+          <div class="tab">إساءة (3)</div>
+          <div class="tab">احتيال (1)</div>
+          <div class="tab">سبام (1)</div>
+          <div class="tab">مغلقة (24)</div>
+        </div>
+        <div id="moderationList"></div>
+      </section>
+
+      <!-- ===== BANS ===== -->
+      <section class="page" id="pg-bans">
+        <div class="page-head">
+          <div>
+            <h2>🚫 قائمة الحظر</h2>
+            <p>إجمالي المحظورين: 12 • حظر دائم: 4 • مؤقت: 8</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn" onclick="alert('فتح سجل رفع الحظر')">📜 سجل الرفع</button>
+            <button class="btn btn-danger" onclick="openModal('modalBan')">🚫 حظر جديد</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>العضو المحظور</th>
+                <th>الدولة</th>
+                <th>السبب</th>
+                <th>المدة</th>
+                <th>التاريخ</th>
+                <th>IP</th>
+                <th>إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="bansBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== LOGS ===== -->
+      <section class="page" id="pg-logs">
+        <div class="page-head">
+          <div>
+            <h2>📜 سجل النشاط</h2>
+            <p>آخر 30 عملية في الموقع</p>
+          </div>
+          <div class="page-actions">
+            <select><option>الكل</option><option>دخول/خروج</option><option>كتم</option><option>طرد</option><option>حظر</option></select>
+            <button class="btn">📥 تصدير</button>
+          </div>
+        </div>
+        <div class="table-wrap" id="logsList"></div>
+      </section>
+
+      <!-- ===== NEWS ===== -->
+      <section class="page" id="pg-news">
+        <div class="page-head">
+          <div>
+            <h2>📰 الأخبار والمنشورات</h2>
+            <p>نشر إعلان لجميع الأعضاء</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-primary" onclick="publishNews()">📤 نشر الآن</button>
+          </div>
+        </div>
+        <div class="news-form">
+          <div class="field"><label>عنوان الخبر</label><input type="text" id="newsTitle" placeholder="مثال: تحديث جديد في الموقع"></div>
+          <div class="field"><label>التصنيف</label>
+            <select>
+              <option>📢 إعلان رسمي</option>
+              <option>🎉 تهنئة</option>
+              <option>🔒 تحديث أمني</option>
+              <option>📅 فعالية</option>
+              <option>⚠️ تنبيه</option>
+            </select>
+          </div>
+          <div class="field"><label>المحتوى</label><textarea placeholder="اكتب محتوى الخبر هنا... يدعم الإيموجي 🎉"></textarea></div>
+          <div class="row2">
+            <div class="field"><label>إرفاق صورة (اختياري)</label><input type="file"></div>
+            <div class="field"><label>صلاحية العرض</label>
+              <select><option>الكل</option><option>الأعضاء فقط</option><option>مميز وفوق</option><option>إدارة فقط</option></select>
+            </div>
+          </div>
+        </div>
+        <h3 style="color:var(--primary);margin-bottom:12px;font-size:16px">📚 الأخبار السابقة</h3>
+        <div class="news-list">
+          <div class="news-row">
+            <div class="av-sm">★</div>
+            <div class="body">
+              <h4>🎉 مرحباً بجميع الأعضاء الجدد</h4>
+              <p>نرحب بكل من انضم حديثاً لموقعنا، يرجى الالتزام بسياسة الموقع والاستمتاع بتجربة دردشة ممتعة وآمنة. 🤝</p>
+              <div class="meta">
+                <span>👑 المالك</span>
+                <span>📅 20/07/2026 — 10:30</span>
+                <span>👁️ 1,247 مشاهدة</span>
+                <span>❤️ 25 إعجاب</span>
+                <span>💬 12 تعليق</span>
+              </div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="if(confirm('حذف الخبر؟'))this.closest('.news-row').remove()">🗑️</button>
+          </div>
+          <div class="news-row">
+            <div class="av-sm">★</div>
+            <div class="body">
+              <h4>🔒 تحديثات أمنية جديدة</h4>
+              <p>تم تفعيل نظام التشفير الجديد للرسائل الخاصة، وكذلك نظام كشف السبام الآلي v2.0.</p>
+              <div class="meta">
+                <span>👑 المالك</span>
+                <span>📅 18/07/2026 — 16:00</span>
+                <span>👁️ 892 مشاهدة</span>
+              </div>
+            </div>
+            <button class="btn btn-danger btn-sm" onclick="if(confirm('حذف الخبر؟'))this.closest('.news-row').remove()">🗑️</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== STORE ===== -->
+      <section class="page" id="pg-store">
+        <div class="page-head">
+          <div>
+            <h2>🛒 المتجر والأسعار</h2>
+            <p>تخصيص أسعار الرتب والباقات</p>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-success" onclick="showToast('تم حفظ الأسعار')">💾 حفظ الكل</button>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="set-card">
+            <h3>💎 رتبة مميز</h3>
+            <div class="field"><label>السعر بالدولار</label><input type="number" value="500"></div>
+            <div class="field"><label>المزايا</label>
+              <select multiple style="height:140px" disabled>
+                <option selected>رفع صور بروفايل وحائط</option>
+                <option selected>إرسال صور ويوتيوب</option>
+                <option selected>تغيير لون الاسم</option>
+                <option selected>التحكم بالخاص</option>
+              </select>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">متاح للشراء التلقائي</div>
+                <div class="label-sub">بدون موافقة المالك</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">المشتركون النشطون</div>
+                <div class="label-sub">47 عضو</div>
+              </div>
+              <strong style="color:var(--primary)">$23,500</strong>
+            </div>
+          </div>
+          <div class="set-card">
+            <h3>🛡️ رتبة مشرف</h3>
+            <div class="field"><label>السعر بالدولار</label><input type="number" value="150000"></div>
+            <div class="field"><label>المزايا الأساسية</label>
+              <select multiple style="height:140px" disabled>
+                <option selected>كل صلاحيات المميز</option>
+                <option selected>كتم حتى 10 دقائق</option>
+                <option selected>طرد حتى ساعة</option>
+                <option selected>حذف رسائل</option>
+              </select>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">يتطلب موافقة المالك</div>
+                <div class="label-sub">لأسباب أمنية</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">طلبات معلقة</div>
+                <div class="label-sub">3 طلبات بانتظار موافقتك</div>
+              </div>
+              <button class="btn btn-warning btn-sm">مراجعة</button>
+            </div>
+          </div>
+          <div class="set-card">
+            <h3>💵 باقات الرصيد</h3>
+            <div class="field"><label>1,000 رصيد</label><input type="number" value="2"></div>
+            <div class="field"><label>10,000 رصيد</label><input type="number" value="12"></div>
+            <div class="field"><label>50,000 رصيد</label><input type="number" value="55"></div>
+            <div class="field"><label>100,000 رصيد</label><input type="number" value="100"></div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">الصرف بعملة USDT</div>
+                <div class="label-sub">TRC20 تلقائي</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SETTINGS ===== -->
+      <section class="page" id="pg-settings">
+        <div class="page-head">
+          <div>
+            <h2>⚙️ إعدادات الموقع</h2>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-success" onclick="showToast('تم حفظ الإعدادات')">💾 حفظ</button>
+          </div>
+        </div>
+        <div class="settings-grid">
+          <div class="set-card">
+            <h3>🌐 إعدادات عامة</h3>
+            <div class="set-row">
+              <div>
+                <div class="label-main">اسم الموقع</div>
+                <div class="label-sub">يظهر في الشريط العلوي</div>
+              </div>
+              <input type="text" value="شات اليمن المطور" style="background:var(--bg-2);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text);width:180px">
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">شعار الموقع</div>
+                <div class="label-sub">رمز تعبيري</div>
+              </div>
+              <input type="text" value="🇾🇪" style="background:var(--bg-2);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text);width:80px;font-size:22px;text-align:center">
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">المنطقة الزمنية</div>
+              </div>
+              <select style="background:var(--bg-2);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text);width:180px">
+                <option>Asia/Aden</option><option>Asia/Riyadh</option><option>Africa/Cairo</option>
+              </select>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">اللغة الافتراضية</div>
+              </div>
+              <select style="background:var(--bg-2);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text);width:180px">
+                <option>العربية 🇸🇦</option><option>English</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="set-card">
+            <h3>🎨 المظهر والثيم</h3>
+            <div class="set-row">
+              <div>
+                <div class="label-main">الثيم الافتراضي</div>
+                <div class="label-sub">يُطبَّق على الأعضاء الجدد</div>
+              </div>
+              <select style="background:var(--bg-2);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text);width:140px">
+                <option>Dark</option><option>Lite</option>
+              </select>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">اللون الرئيسي</div>
+              </div>
+              <input type="color" value="#d4a857" style="width:50px;height:32px;border-radius:6px;border:1px solid var(--border);background:transparent;cursor:pointer">
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">صورة البانوراما الترحيبية</div>
+                <div class="label-sub">تظهر في الصفحة الرئيسية</div>
+              </div>
+              <button class="btn btn-sm">🖼️ تغيير</button>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">بانوراما ثلاثية (دوّارة)</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+
+          <div class="set-card">
+            <h3>💬 إعدادات الدردشة</h3>
+            <div class="set-row">
+              <div>
+                <div class="label-main">السماح للزوار بالكتابة</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">السماح للزوار بالتسجيل الصوتي</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">حد الرسائل في الدقيقة</div>
+                <div class="label-sub">مكافحة السبام</div>
+              </div>
+              <input type="number" value="20" style="background:var(--bg-2);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text);width:80px">
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">حد طول الرسالة</div>
+                <div class="label-sub">بالأحرف</div>
+              </div>
+              <input type="number" value="500" style="background:var(--bg-2);border:1px solid var(--border);padding:6px 10px;border-radius:6px;color:var(--text);width:80px">
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">نظام الكتم/الطرد الآلي</div>
+                <div class="label-sub">ربوت ضد السب والشتم</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+
+          <div class="set-card">
+            <h3>💳 بوابات الدفع</h3>
+            <div class="set-row">
+              <div>
+                <div class="label-main">كريمي - Yemen</div>
+                <div class="label-sub">محفظة إلكترونية محلية</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">USDT (TRC20)</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">Payeer</div>
+              </div>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">موني جرام</div>
+              </div>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+
+          <div class="set-card">
+            <h3>📧 التواصل</h3>
+            <div class="field"><label>البريد الإلكتروني للدعم</label><input type="email" value="support@yemenchat.dev"></div>
+            <div class="field"><label>فيسبوك</label><input type="text" value="@yemenchat"></div>
+            <div class="field"><label>تيليجرام</label><input type="text" value="@yemenchat_support"></div>
+            <div class="field"><label>واتساب الدعم</label><input type="text" value="+967700000000"></div>
+          </div>
+
+          <div class="set-card">
+            <h3>📊 إحصائيات وإعلانات</h3>
+            <div class="set-row">
+              <div>
+                <div class="label-main">عرض "متصل الآن" للأعضاء</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">إظهار إعلانات طرف ثالث</div>
+              </div>
+              <div class="toggle" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="set-row">
+              <div>
+                <div class="label-main">إرسال إشعارات بريدية</div>
+                <div class="label-sub">للأخبار والبلاغات</div>
+              </div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SECURITY ===== -->
+      <section class="page" id="pg-security">
+        <div class="page-head">
+          <div>
+            <h2>🛡️ الأمان والحماية</h2>
+          </div>
+          <div class="page-actions">
+            <button class="btn btn-danger" onclick="alert('تنفيذ فحص أمني شامل')">🔍 فحص أمني</button>
+          </div>
+        </div>
+        <div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+          <div class="set-card">
+            <h3>🔐 المصادقة الثنائية</h3>
+            <div class="set-row"><div><div class="label-main">مطلوبة للمالك</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="set-row"><div><div class="label-main">مطلوبة للإدارة</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="set-row"><div><div class="label-main">مطلوبة للمشرفين</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+          <div class="set-card">
+            <h3>🚧 جدران الحماية</h3>
+            <div class="set-row"><div><div class="label-main">حماية DDoS</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="set-row"><div><div class="label-main">حظر IP مشبوه</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="set-row"><div><div class="label-main">فلترة VPN/Proxy</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+          <div class="set-card">
+            <h3>🔑 تغيير كلمة مرور المالك</h3>
+            <div class="field"><label>كلمة المرور الحالية</label><input type="password"></div>
+            <div class="field"><label>الجديدة</label><input type="password"></div>
+            <div class="field"><label>تأكيد الجديدة</label><input type="password"></div>
+            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showToast('تم تغيير كلمة المرور')">🔒 تحديث</button>
+          </div>
+          <div class="set-card">
+            <h3>📝 الأحداث الأمنية</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+              <div style="padding:10px;background:var(--bg-2);border-radius:8px;border-right:3px solid var(--warn)">
+                <strong style="color:var(--warn)">⚠️ محاولة دخول فاشلة</strong>
+                <div style="color:var(--text-muted);font-size:11px;margin-top:4px">IP: 102.45.xx.xx — قبل 12 دقيقة</div>
+              </div>
+              <div style="padding:10px;background:var(--bg-2);border-radius:8px;border-right:3px solid var(--success)">
+                <strong style="color:var(--success)">✓ تغيير كلمة مرور المالك</strong>
+                <div style="color:var(--text-muted);font-size:11px;margin-top:4px">قبل يوم</div>
+              </div>
+              <div style="padding:10px;background:var(--bg-2);border-radius:8px;border-right:3px solid var(--info)">
+                <strong style="color:var(--info)">🔓 دخول المالك من IP جديد</strong>
+                <div style="color:var(--text-muted);font-size:11px;margin-top:4px">IP: 5.45.212.xx — قبل 3 أيام</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+<div class="modal-bg" id="modalUser">
+  <div class="modal">
+    <div class="m-head">
+      <h3 id="userModalTitle">تعديل بيانات العضو</h3>
+      <button class="modal-close" onclick="closeModal('modalUser')">✖</button>
+    </div>
+    <div class="m-body">
+      <div class="form-grid">
+        <div class="field"><label>اسم العرض</label><input type="text" id="umName"></div>
+        <div class="field"><label>الرتبة</label>
+          <select id="umRole">
+            <option>مالك 👑</option><option>ادمن ⭐</option><option>إدارة ☆</option>
+            <option>مشرف 🛡️</option><option>مميز 💎</option><option selected>عضو 🟢</option><option>زائر</option>
+          </select>
+        </div>
+        <div class="field"><label>البريد</label><input type="email" id="umEmail"></div>
+        <div class="field"><label>الدولة</label>
+          <select id="umCountry"><option>🇾🇪 اليمن</option><option>🇸🇦 السعودية</option><option>🇪🇬 مصر</option><option>🇩🇿 الجزائر</option></select>
+        </div>
+        <div class="field"><label>العمر</label><input type="number" id="umAge"></div>
+        <div class="field"><label>الجنس</label>
+          <select id="umGender"><option>ذكر</option><option>أنثى</option></select>
+        </div>
+        <div class="field"><label>الرصيد ($)</label><input type="number" id="umCredit"></div>
+        <div class="field"><label>IP (للمالك)</label><input type="text" id="umIP" readonly></div>
+      </div>
+      <div class="field"><label>الحالة</label>
+        <textarea id="umStatus" rows="2"></textarea>
+      </div>
+      <div style="background:var(--bg-0);border:1px solid var(--border);padding:10px;border-radius:8px;margin-bottom:14px;font-size:12px;color:var(--text-muted)">
+        🔒 <strong style="color:var(--accent)">تحذير:</strong> تعديل الرتبة أو الرصيد يُسجَّل تلقائياً في سجل النشاط
+      </div>
+      <div class="row2">
+        <button class="btn btn-success" onclick="saveUser()">💾 حفظ</button>
+        <button class="btn" onclick="resetPassword()">🔑 إعادة كلمة المرور</button>
+        <button class="btn btn-danger" onclick="confirmDeleteUser()">🗑️ حذف العضوية</button>
+        <button class="btn" onclick="closeModal('modalUser')">✖ إلغاء</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalAddUser">
+  <div class="modal">
+    <div class="m-head">
+      <h3>➕ إضافة عضو جديد</h3>
+      <button class="modal-close" onclick="closeModal('modalAddUser')">✖</button>
+    </div>
+    <div class="m-body">
+      <div class="form-grid">
+        <div class="field"><label>اسم المستخدم</label><input type="text"></div>
+        <div class="field"><label>الرتبة الافتراضية</label>
+          <select><option>عضو 🟢</option><option>مميز 💎</option><option>مشرف 🛡️</option><option>إدارة ☆</option></select>
+        </div>
+        <div class="field"><label>البريد</label><input type="email"></div>
+        <div class="field"><label>الدولة</label>
+          <select><option>🇾🇪 اليمن</option><option>🇸🇦 السعودية</option></select>
+        </div>
+        <div class="field"><label>كلمة المرور</label><input type="password"></div>
+        <div class="field"><label>الرصيد الابتدائي</label><input type="number" value="0"></div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showToast('تمت إضافة العضو بنجاح');closeModal('modalAddUser')">✅ إضافة</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBan">
+  <div class="modal">
+    <div class="m-head">
+      <h3>🚫 حظر عضو</h3>
+      <button class="modal-close" onclick="closeModal('modalBan')">✖</button>
+    </div>
+    <div class="m-body">
+      <div class="field"><label>اسم العضو أو IP</label><input type="text" placeholder="ابحث عن عضو أو أدخل IP"></div>
+      <div class="field"><label>سبب الحظر</label>
+        <select><option>إساءة لفظية متكررة</option><option>احتيال ونصب</option><option>سبام</option><option>انتحال شخصية</option><option>محتوى غير لائق</option><option>أخرى</option></select>
+      </div>
+      <div class="field"><label>المدة</label>
+        <select><option>ساعة</option><option>يوم</option><option>أسبوع</option><option>شهر</option><option selected>دائم</option></select>
+      </div>
+      <div class="field"><label>تفاصيل إضافية</label><textarea placeholder="أضف أي تفاصيل..."></textarea></div>
+      <button class="btn btn-danger" style="width:100%;justify-content:center" onclick="showToast('تم تطبيق الحظر');closeModal('modalBan')">🚫 تطبيق الحظر</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modalBulk">
+  <div class="modal">
+    <div class="m-head">
+      <h3 id="bulkTitle">إجراء جماعي</h3>
+      <button class="modal-close" onclick="closeModal('modalBulk')">✖</button>
+    </div>
+    <div class="m-body">
+      <p>سيتم تطبيق الإجراء على <strong id="bulkCount">0</strong> عضو محدد</p>
+      <div class="field" id="bulkMsgField" style="display:none"><label>الرسالة</label><textarea placeholder="اكتب الرسالة التي سترسل للأعضاء..."></textarea></div>
+      <div class="field" id="bulkMinutesField" style="display:none"><label>المدة (دقائق)</label><input type="number" value="5"></div>
+      <div class="field" id="bulkReasonField" style="display:none"><label>السبب</label><input type="text"></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="confirmBulk()">تأكيد التنفيذ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">تم بنجاح</div>
+
+<script>
+/* ============================================
+   STATE
+   ============================================ */
+const USERS = [
+  {name:'يوسف الصنعاني', initials:'ي', role:'مالك', roleCls:'gold', country:'🇾🇪', status:'🟢', online:true, credit:99999, joined:'01/01/2024', ip:'5.45.212.xx', likes:999},
+  {name:'عمر الحضرمي', initials:'ع', role:'ادمن ⭐', roleCls:'purple', country:'🇾🇪', status:'🟢', online:true, credit:12450, joined:'01/02/2024', ip:'5.45.215.xx', likes:120},
+  {name:'خنجر يماني', initials:'خ', role:'إدارة ☆', roleCls:'red', country:'🇾🇪', status:'🟢', online:true, credit:8200, joined:'15/03/2024', ip:'102.45.xx.xx', likes:88},
+  {name:'أحمد السعيد', initials:'أ', role:'مشرف 🛡️', roleCls:'orange', country:'🇾🇪', status:'🟢', online:true, credit:3400, joined:'20/04/2025', ip:'5.45.220.xx', likes:45},
+  {name:'نورة', initials:'ن', role:'إدارة ☆', roleCls:'red', country:'🇰🇼', status:'🟡', online:false, credit:9100, joined:'12/01/2025', ip:'31.7.xx.xx', likes:55},
+  {name:'سارة', initials:'س', role:'مميز 💎', roleCls:'gold', country:'🇸🇦', status:'🟢', online:true, credit:2150, joined:'05/02/2026', ip:'94.200.xx.xx', likes:34},
+  {name:'محمد المصري', initials:'م', role:'مميز 💎', roleCls:'gold', country:'🇪🇬', status:'🟢', online:true, credit:1200, joined:'10/05/2026', ip:'41.32.xx.xx', likes:18},
+  {name:'فاطمة الزهراء', initials:'ف', role:'عضو 🟢', country:'🇪🇬', status:'🟢', online:true, credit:540, joined:'02/06/2026', ip:'41.36.xx.xx', likes:14},
+  {name:'محمد الجزائري', initials:'م', role:'مشرف 🛡️', roleCls:'orange', country:'🇩🇿', status:'🔴', online:false, credit:2800, joined:'15/01/2025', ip:'41.111.xx.xx', likes:42},
+  {name:'ميرا', initials:'م', role:'عضو 🟢', country:'🇲🇦', status:'🟢', online:true, credit:380, joined:'03/07/2026', ip:'196.70.xx.xx', likes:9},
+  {name:'سحب_الروح', initials:'س', role:'🚫 محظور', roleCls:'red', country:'🇾🇪', status:'—', online:false, credit:0, joined:'12/04/2026', ip:'5.45.230.xx', likes:0},
+  {name:'سبام_2026', initials:'س', role:'🚫 محظور', roleCls:'red', country:'🇸🇦', status:'—', online:false, credit:0, joined:'01/05/2026', ip:'88.99.xx.xx', likes:0}
+];
+
+const ROOMS_ADMIN = [
+  {flag:'🌎', name:'غرفة العامة', slug:'global', online:328, manager:'عمر الحضرمي', desc:'الدردشة الرئيسية لكل العرب'},
+  {flag:'🇾🇪', name:'غرفة اليمن', slug:'yemen', online:142, manager:'خنجر يماني', desc:'أهل اليمن وتاريخهم'},
+  {flag:'🇸🇦', name:'غرفة السعودية', slug:'saudi', online:87, manager:'نورة', desc:'أهل المملكة'},
+  {flag:'🇪🇬', name:'غرفة مصر', slug:'egypt', online:64, manager:'محمد المصري', desc:'أهل الكنانة'},
+  {flag:'🇩🇿', name:'غرفة الجزائر', slug:'algeria', online:39, manager:'محمد الجزائري', desc:'أهل الجزائر'},
+  {flag:'🇲🇦', name:'غرفة المغرب', slug:'morocco', online:21, manager:'ميرا', desc:'أهل المغرب'},
+  {flag:'🌙', name:'غرفة رمضان 🌙', slug:'ramadan', online:0, manager:'-', desc:'فعالية موسمية (مغلقة)'}
+];
+
+const REPORTS = [
+  {reporter:'سارة', reporterCls:'gold', reported:'عضو_مسيء', room:'غرفة العامة', type:'إساءة', reason:'إهانات متكررة تجاه المستخدم', msg:'يا قليل الأدب عندك مشاكل عائلية واضحة 😡', time:'قبل 5 دقائق', level:'error'},
+  {reporter:'أحمد السعيد', reporterCls:'orange', reported:'سبام_2026', room:'غرفة اليمن', type:'احتيال', reason:'محاولة احتيال عبر روابط خارجية', msg:'اشترك الآن في موقعنا واحصل على 1000$ فوراً 💰', time:'قبل 22 دقيقة', level:'error'},
+  {reporter:'فاطمة', reported:'مستخدم_123', room:'غرفة مصر', type:'إساءة', reason:'سب وشتائم', msg:'أنت وش قبيلتك... 🚫', time:'قبل ساعة', level:'error'},
+  {reporter:'ميرا', reporterCls:'green', reported:'spam_2026', room:'غرفة العامة', type:'سبام', reason:'إعلانات متكررة', msg:'اشتري الآن بسعر مميز ⭐⭐⭐', time:'قبل ساعتين', level:'warn'},
+  {reporter:'نورة', reporterCls:'red', reported:'user_999', room:'غرفة السعودية', type:'إساءة', reason:'محتوى غير لائق', msg:'[صورة محذوفة]', time:'قبل 3 ساعات', level:'warn'}
+];
+
+const LOGS = [
+  {lvl:'ok', who:'عمر الحضرمي', msg:'• رفع عضو <strong>أحمد</strong> إلى رتبة مشرف', ts:'17:42'},
+  {lvl:'warn', who:'خنجر يماني', msg:'• كتم <strong>spam_xx</strong> لمدة 5 دقائق في غرفة اليمن', ts:'17:38'},
+  {lvl:'error', who:'النظام', msg:'• محاولة دخول فاشلة — IP: 88.99.xx.xx', ts:'17:35'},
+  {lvl:'info', who:'النظام', msg:'• <strong>328</strong> عضو متصل الآن', ts:'17:30'},
+  {lvl:'ok', who:'المالك', msg:'• نشر خبر: <strong>تحديثات أمنية جديدة</strong>', ts:'16:00'},
+  {lvl:'warn', who:'محمد الجزائري', msg:'• طرد <strong>user_88</strong> من غرفة الجزائر لمدة 30 دقيقة', ts:'15:45'},
+  {lvl:'info', who:'النظام', msg:'• تجديد اشتراك مميز لـ <strong>سارة</strong> تلقائياً', ts:'14:20'},
+  {lvl:'error', who:'النظام', msg:'• اكتشاف سبام آلي: <strong>23</strong> رسالة محجوبة', ts:'13:50'},
+  {lvl:'ok', who:'نورة', msg:'• وافقت على طلب صداقة <strong>أحمد</strong>', ts:'12:15'},
+  {lvl:'warn', who:'النظام', msg:'• دخول المالك من IP جديد <strong>5.45.212.xx</strong>', ts:'11:00'}
+];
+
+const BAR_DATA = [380, 420, 560, 490, 720, 680, 850];
+
+/* ============================================
+   UTILITIES
+   ============================================ */
+function $(id){return document.getElementById(id)}
+function openModal(id){$(id).classList.add('show')}
+function closeModal(id){$(id).classList.remove('show')}
+function showToast(msg, type=''){
+  const t=$('toast'); t.textContent=msg;
+  t.className='toast show '+(type=='danger'?'danger':(type=='success'?'success':''));
+  setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ============================================
+   AUTH
+   ============================================ */
+function genCaptcha(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let s='';
+  for(let i=0;i<5;i++) s+=chars[Math.floor(Math.random()*chars.length)];
+  $('captchaBox').textContent=s;
+}
+genCaptcha();
+$('captchaBox').onclick = genCaptcha;
+function auth(){
+  const u = $('ownerUser').value.trim();
+  const p = $('ownerPass').value;
+  const c = $('captchaInput').value.trim().toUpperCase();
+  if(u!=='owner_admin' || p!=='********') return showToast('بيانات الدخول غير صحيحة','danger');
+  if(c!==$('captchaBox').textContent) return showToast('كود التحقق غير صحيح','danger');
+  $('authGate').classList.add('hide');
+  $('app').classList.remove('hidden');
+  showToast('مرحباً يا مالك 👑','success');
+  initAdmin();
+}
+function logout(){
+  $('app').classList.add('hidden');
+  $('authGate').classList.remove('hide');
+  $('captchaInput').value='';
+  genCaptcha();
+}
+
+/* ============================================
+   NAVIGATION
+   ============================================ */
+const PAGE_TITLES = {
+  dashboard:'الإحصائيات', users:'إدارة الأعضاء', rooms:'إدارة الغرف',
+  moderation:'مراجعة البلاغات', bans:'قائمة الحظر', logs:'سجل النشاط',
+  news:'الأخبار والمنشورات', store:'المتجر والأسعار',
+  settings:'إعدادات الموقع', security:'الأمان والحماية'
+};
+function goPage(page, link){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));
+  $(`pg-${page}`).classList.add('active');
+  link.classList.add('active');
+  $('pageTitle').textContent = PAGE_TITLES[page];
+  $('pageBread').textContent = 'لوحة المالك ← '+PAGE_TITLES[page];
+  document.getElementById('sidebar').classList.remove('open');
+}
+
+/* ============================================
+   INIT VIEWS
+   ============================================ */
+function initAdmin(){
+  renderBars();
+  renderUsers();
+  renderRooms();
+  renderModeration();
+  renderBans();
+  renderLogs();
+}
+function renderBars(){
+  const max = Math.max(...BAR_DATA);
+  const days=['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+  const c=$('barsChart'); c.innerHTML='';
+  BAR_DATA.forEach((v,i)=>{
+    const pct = (v/max)*100;
+    const col=document.createElement('div');
+    col.className='bar-col';
+    col.innerHTML=`<div class="bar" style="height:${pct}%"><span class="bar-value">${v}</span></div><div class="bar-label">${days[i]}</div>`;
+    c.appendChild(col);
+  });
+}
+
+/* ============================================
+   USERS TABLE
+   ============================================ */
+function renderUsers(){
+  const q = $('userSearch').value.toLowerCase();
+  const filt = USERS.filter(u=>{
+    const r=$('filterRole').value;
+    const s=$('filterStatus').value;
+    const c=$('filterCountry').value;
+    if(r && !u.role.includes(r.replace('🟢','').replace('💎','').replace('🛡️','').replace('☆ ','').replace('⭐ ','').trim())) return false;
+    if(q && !u.name.toLowerCase().includes(q) && !u.ip.includes(q)) return false;
+    return true;
+  });
+  const body=$('usersBody'); body.innerHTML='';
+  $('usersCount').textContent = '1,847';
+  filt.forEach((u,i)=>{
+    body.innerHTML+=`
+      <tr>
+        <td><input type="checkbox" class="tbl-check usr-chk" data-idx="${i}"></td>
+        <td>
+          <div class="cell-user">
+            <div class="av">${u.initials}</div>
+            <div>
+              <div class="nm">${u.name}</div>
+              <div class="sub">${u.email||'user'+i+'@yemenchat.dev'}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="bdg ${u.roleCls||'gray'}">${u.role}</span></td>
+        <td>${u.country}</td>
+        <td><span class="bdg ${u.online?(u.status==='🟢'?'green':'orange'):'gray'} dot">${u.status} ${u.online?'متصل':'غير متصل'}</span></td>
+        <td><strong style="color:var(--primary)">${u.credit.toLocaleString()} 💲</strong></td>
+        <td style="font-size:12px;color:var(--text-muted)">${u.joined}</td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-act" title="ملف المستخدم" onclick="openUserModal(${i})">👁️</button>
+            <button class="icon-act" title="رفع رتبة" onclick="promoteUser(${i})">⬆️</button>
+            <button class="icon-act warn" title="كتم" onclick="muteUser(${i})">🔇</button>
+            <button class="icon-act success" title="رسالة خاصة" onclick="msgUser(${i})">✉️</button>
+            <button class="icon-act danger" title="حظر" onclick="banUser(${i})">🚫</button>
+            <button class="icon-act danger" title="حذف" onclick="deleteUser(${i})">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
+  if(!filt.length){
+    body.innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-muted)">لا توجد نتائج</td></tr>';
+  }
+  updateSel();
+}
+function filterUsers(type, tab){
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  tab.classList.add('active');
+  const sel = $('filterRole');
+  if(type==='vip') sel.value='مميز';
+  else if(type==='mod') sel.value='مشرف';
+  else if(type==='admin') sel.value='إدارة';
+  else if(type==='banned') sel.value='مميز'; // simplified demo
+  else sel.value='';
+  renderUsers();
+}
+function toggleAll(cb){
+  document.querySelectorAll('.usr-chk').forEach(c=>c.checked=cb.checked);
+  updateSel();
+}
+function updateSel(){
+  const cnt = document.querySelectorAll('.usr-chk:checked').length;
+  $('selCount').textContent = cnt;
+}
+document.addEventListener('change', e=>{
+  if(e.target.classList.contains('usr-chk')) updateSel();
+});
+
+/* ============================================
+   USER ACTIONS
+   ============================================ */
+function openUserModal(idx){
+  const u = USERS[idx];
+  $('umName').value = u.name;
+  $('umRole').value = u.role.split(' ')[0];
+  $('umEmail').value = u.name.toLowerCase().replace(' ','_')+'@yemenchat.dev';
+  $('umCountry').value = u.country+' '+(u.country.includes('اليمن')?'اليمن':u.country.includes('السعودية')?'السعودية':u.country.includes('مصر')?'مصر':'الجزائر');
+  $('umAge').value = 20+idx*3;
+  $('umGender').value = 'ذكر';
+  $('umCredit').value = u.credit;
+  $('umIP').value = u.ip;
+  $('umStatus').value = 'لا توجد حالة محددة';
+  openModal('modalUser');
+}
+function promoteUser(idx){USERS[idx].role = USERS[idx].role.indexOf('مميز')<0?'مميز 💎':'عضو 🟢';showToast('تم تحديث الرتبة لـ '+USERS[idx].name);renderUsers()}
+function muteUser(idx){showToast('تم كتم '+USERS[idx].name+' لمدة 5 دقائق','success')}
+function msgUser(idx){showToast('فتح محادثة خاصة مع '+USERS[idx].name)}
+function banUser(idx){if(confirm('تأكيد حظر '+USERS[idx].name+'؟')){USERS[idx].role='🚫 محظور';USERS[idx].roleCls='red';USERS[idx].online=false;showToast('تم حظر '+USERS[idx].name,'danger');renderUsers()}}
+function deleteUser(idx){if(confirm('⚠️ تأكيد حذف عضوية '+USERS[idx].name+' نهائياً؟')){USERS.splice(idx,1);showToast('تم الحذف','danger');renderUsers()}}
+function saveUser(){showToast('تم حفظ بيانات العضو','success');closeModal('modalUser')}
+function resetPassword(){if(confirm('إعادة تعيين كلمة المرور وإرسالها للبريد؟'))showToast('تم إرسال كلمة مرور مؤقتة','success')}
+function confirmDeleteUser(){if(confirm('تأكيد الحذف النهائي؟ لا يمكن التراجع'))closeModal('modalUser');showToast('تم حذف العضوية','danger')}
+
+/* ============================================
+   BULK
+   ============================================ */
+function bulkAction(act){
+  const cnt = document.querySelectorAll('.usr-chk:checked').length;
+  if(!cnt) return showToast('حدد أعضاء أولاً','danger');
+  $('bulkCount').textContent = cnt;
+  $('bulkMsgField').style.display = act==='msg'?'block':'none';
+  $('bulkMinutesField').style.display = act==='mute'?'block':'none';
+  $('bulkReasonField').style.display = act==='ban'?'block':'none';
+  $('bulkTitle').textContent = {msg:'✉️ رسالة جماعية',mute:'🔇 كتم جماعي',ban:'🚫 حظر جماعي'}[act];
+  $('modalBulk').dataset.action = act;
+  openModal('modalBulk');
+}
+function confirmBulk(){
+  const act=$('modalBulk').dataset.action;
+  const cnt=$('bulkCount').textContent;
+  closeModal('modalBulk');
+  showToast(`تم تنفيذ ${act==='msg'?'إرسال رسالة':act==='mute'?'كتم':act==='ban'?'حظر':'إجراء'} لـ ${cnt} عضو`,'success');
+}
+
+/* ============================================
+   ROOMS ADMIN
+   ============================================ */
+function renderRooms(){
+  const g=$('roomsGrid'); g.innerHTML='';
+  ROOMS_ADMIN.forEach(r=>{
+    g.innerHTML+=`
+      <div class="room-admin-card">
+        <div class="flag">${r.flag}</div>
+        <div class="info2">
+          <h3>${r.name}</h3>
+          <div class="meta">${r.desc}</div>
+          <div class="meta">🟢 <strong>${r.online}</strong> متصل • المعرف: <code style="color:var(--primary)">${r.slug}</code></div>
+          <div class="meta">المراقب: <strong>${r.manager}</strong></div>
+          <div class="actions">
+            <button class="btn btn-sm">⚙️ تعديل</button>
+            <button class="btn btn-sm">👤 تعيين مراقب</button>
+            <button class="btn btn-sm btn-info">📊 إحصائيات</button>
+            <button class="btn btn-sm btn-danger">🗑️ حذف</button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+}
+
+/* ============================================
+   MODERATION
+   ============================================ */
+function renderModeration(){
+  const c=$('moderationList'); c.innerHTML='';
+  REPORTS.forEach(r=>{
+    c.innerHTML+=`
+      <div class="mod-card ${r.level}">
+        <div class="mod-head">
+          <div class="left">
+            <div class="av">${r.reporter[0]}</div>
+            <div>
+              <div class="nm">${r.reporter} <span style="font-size:11px;color:var(--text-muted);font-weight:400">بلّغ ضد</span> <strong style="color:var(--accent)">${r.reported}</strong></div>
+              <div class="info">📍 ${r.room} • ${r.time} • <span class="bdg ${r.type==='إساءة'?'red':r.type==='احتيال'?'orange':'blue'}">${r.type}</span></div>
+            </div>
+          </div>
+          <div class="right">
+            <button class="btn btn-sm" onclick="showToast('فتح محادثة البلاغ')">👁️ عرض</button>
+          </div>
+        </div>
+        <div class="mod-rel"><strong>السبب:</strong> ${r.reason}</div>
+        <div class="mod-quote">"${r.msg}"</div>
+        <div class="mod-actions">
+          <button class="btn btn-success btn-sm" onclick="resolveReport(this,'ok')">✅ رفض البلاغ (مبالغ)</button>
+          <button class="btn btn-warning btn-sm" onclick="resolveReport(this,'mute')">🔇 كتم المُبلَّغ عنه</button>
+          <button class="btn btn-danger btn-sm" onclick="resolveReport(this,'ban')">🚫 حظر المُبلَّغ عنه</button>
+          <button class="btn btn-info btn-sm" onclick="resolveReport(this,'rm')">🗑️ حذف الرسالة</button>
+          <button class="btn btn-sm" style="margin-right:auto" onclick="resolveReport(this,'close')">✖ إغلاق</button>
+        </div>
+      </div>
+    `;
+  });
+}
+function resolveReport(btn, action){
+  const card = btn.closest('.mod-card');
+  const names = {ok:'تم رفض البلاغ', mute:'تم كتم العضو', ban:'تم حظر العضو', rm:'تم حذف الرسالة', close:'تم الإغلاق'};
+  card.style.transition='.3s';
+  card.style.opacity='.4';
+  card.style.transform='translateX(50px)';
+  setTimeout(()=>card.remove(),300);
+  showToast(names[action], action==='ban'||action==='mute'?'danger':'success');
+}
+
+/* ============================================
+   BANS TABLE
+   ============================================ */
+function renderBans(){
+  const body=$('bansBody'); body.innerHTML='';
+  const banData = [
+    {name:'سبام_2026', country:'🇸🇦', reason:'سبام متكرر وإعلانات', dur:'دائم', date:'17/07/2026', ip:'88.99.xx.xx'},
+    {name:'سحب_الروح', country:'🇾🇪', reason:'إساءة شديدة', dur:'شهر', date:'15/07/2026', ip:'5.45.230.xx'},
+    {name:'احتيال_88', country:'🇪🇬', reason:'محاولة احتيال', dur:'دائم', date:'12/07/2026', ip:'156.198.xx.xx'},
+    {name:'user_999', country:'🇸🇦', reason:'محتوى غير لائق', dur:'أسبوع', date:'14/07/2026', ip:'88.99.xx.xx'}
+  ];
+  banData.forEach((b,i)=>{
+    const cls = b.dur==='دائم'?'red':'orange';
+    body.innerHTML+=`
+      <tr>
+        <td><div class="cell-user"><div class="av" style="background:linear-gradient(135deg,#e74c3c,#c0392b)">${b.name[0]}</div><div class="nm">${b.name}</div></div></td>
+        <td>${b.country}</td>
+        <td style="font-size:12px">${b.reason}</td>
+        <td><span class="bdg ${cls}">${b.dur}</span></td>
+        <td style="font-size:12px;color:var(--text-muted)">${b.date}</td>
+        <td style="font-size:12px;font-family:monospace;color:var(--text-muted)">${b.ip}</td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-act success" title="رفع الحظر" onclick="liftBan(this,'${b.name}')">✅</button>
+            <button class="icon-act" title="تمديد">⏰</button>
+            <button class="icon-act danger" title="حذف نهائي">🗑️</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
+}
+function liftBan(btn,name){
+  const row = btn.closest('tr');
+  row.style.transition='.3s';row.style.opacity='.4';
+  setTimeout(()=>row.remove(),300);
+  showToast('تم رفع الحظر عن '+name,'success');
+}
+
+/* ============================================
+   LOGS
+   ============================================ */
+function renderLogs(){
+  const c=$('logsList'); c.innerHTML='';
+  LOGS.forEach(l=>{
+    c.innerHTML+=`
+      <div class="log-row">
+        <div class="lvl ${l.lvl}">${l.lvl.toUpperCase()}</div>
+        <div class="msg"><span class="who">${l.who}</span> ${l.msg}</div>
+        <div class="ts">${l.ts}</div>
+      </div>
+    `;
+  });
+}
+
+/* ============================================
+   NEWS PUBLISH
+   ============================================ */
+function publishNews(){
+  const title = $('newsTitle').value.trim();
+  const txt = document.querySelector('#pg-news textarea').value.trim();
+  if(!title) return showToast('أدخل عنوان الخبر','danger');
+  if(!txt) return showToast('أدخل محتوى الخبر','danger');
+  const list = document.querySelector('#pg-news .news-list');
+  const row = document.createElement('div');
+  row.className='news-row';
+  const now = new Date();
+  const date = now.toLocaleDateString('ar-EG')+' — '+now.toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+  row.innerHTML=`
+    <div class="av-sm">★</div>
+    <div class="body">
+      <h4>${title}</h4>
+      <p>${txt}</p>
+      <div class="meta">
+        <span>👑 المالك</span>
+        <span>📅 ${date}</span>
+        <span>👁️ 0 مشاهدة</span>
+      </div>
+    </div>
+    <button class="btn btn-danger btn-sm" onclick="if(confirm('حذف الخبر؟'))this.closest('.news-row').remove()">🗑️</button>
+  `;
+  list.insertBefore(row, list.firstChild);
+  $('newsTitle').value='';
+  document.querySelector('#pg-news textarea').value='';
+  showToast('تم نشر الخبر لجميع الأعضاء','success');
+}
+
+/* ============================================
+   Period tabs (charts)
+   ============================================ */
+document.addEventListener('click', e=>{
+  if(e.target.classList.contains('period-tab')){
+    const siblings = e.target.parentElement.querySelectorAll('.period-tab');
+    siblings.forEach(s=>s.classList.remove('active'));
+    e.target.classList.add('active');
+  }
+});
+
+/* ============================================
+   Init
+   ============================================ */
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderBars();
+  renderUsers();
+  renderRooms();
+  renderModeration();
+  renderBans();
+  renderLogs();
+});
+</script>
+</body>
+</html>
