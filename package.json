@@ -1,0 +1,18 @@
+{
+  "name": "yemen-chat-ws",
+  "version": "1.0.0",
+  "description": "خادم WebSocket لدردشة شات اليمن المطور - عربي - حي",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "keywords": ["websocket", "chat", "arabic", "realtime"],
+  "license": "MIT"
+}
