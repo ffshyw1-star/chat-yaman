@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<title>الدردشة | شات اليمن المطور</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../css/style.css">
+
+</head>
+
+<body>
+
+<div class="chat-page">
+
+<!-- الشريط العلوي -->
+
+<header class="topbar">
+
+<div class="logo">
+
+شات اليمن المطور
+
+</div>
+
+<div class="icons">
+
+<span>👤</span>
+
+<span>📭</span>
+
+<span>❤️</span>
+
+<span>➕👥</span>
+
+<span>✉️</span>
+
+<span>🛒</span>
+
+<span>☰</span>
+
+</div>
+
+</header>
+
+<!-- الرسائل -->
+
+<div class="messages" id="messages">
+
+<div class="message other">
+
+<img src="../images/default-avatar.png">
+
+<div class="bubble">
+
+<b>أحمد</b>
+
+<p>السلام عليكم ورحمة الله وبركاته</p>
+
+<small>17:15</small>
+
+</div>
+
+</div>
+
+<div class="message mine">
+
+<img src="../images/default-avatar.png">
+
+<div class="bubble">
+
+<b>أنا</b>
+
+<p>وعليكم السلام 😊</p>
+
+<small>17:16</small>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- الكتابة -->
+
+<div class="input-area">
+
+<button>➕</button>
+
+<button>😊</button>
+
+<button>🎤</button>
+
+<input
+
+type="text"
+
+id="text"
+
+placeholder="اكتب رسالتك هنا...">
+
+<button id="send">
+
+✈️
+
+</button>
+
+</div>
+
+<!-- الشريط السفلي -->
+
+<footer class="bottom">
+
+<span>👥</span>
+
+<span>🏠</span>
+
+<span>⚙️</span>
+
+<span>🌎</span>
+
+<span>🔊</span>
+
+<span>▶️</span>
+
+</footer>
+
+</div>
+
+<script>
+
+const messages=document.getElementById("messages");
+
+const send=document.getElementById("send");
+
+const text=document.getElementById("text");
+
+send.onclick=function(){
+
+if(text.value.trim()=="") return;
+
+messages.innerHTML+=`
+
+<div class="message mine">
+
+<img src="../images/default-avatar.png">
+
+<div class="bubble">
+
+<b>أنا</b>
+
+<p>${text.value}</p>
+
+<small>${new Date().toLocaleTimeString()}</small>
+
+</div>
+
+</div>
+
+`;
+
+text.value="";
+
+messages.scrollTop=messages.scrollHeight;
+
+}
+
+</script>
+
+</body>
+
+</html>
