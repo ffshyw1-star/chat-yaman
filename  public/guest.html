@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>دخول الزوار | شات اليمن المطور</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../css/style.css">
+
+</head>
+
+<body>
+
+<div class="overlay">
+
+<div class="login-box">
+
+<h1>👤 دخول الزوار</h1>
+
+<p>
+يمكنك الدخول مباشرة للدردشة بدون إنشاء حساب.
+</p>
+
+<form id="guestForm">
+
+<div class="input-group">
+
+<label>الاسم</label>
+
+<input
+type="text"
+id="guestName"
+placeholder="اكتب اسمك"
+maxlength="20"
+required>
+
+</div>
+
+<div class="input-group">
+
+<label>الجنس</label>
+
+<select id="gender">
+
+<option value="">اختر الجنس</option>
+
+<option value="male">👨 ذكر</option>
+
+<option value="female">👩 أنثى</option>
+
+</select>
+
+</div>
+
+<div class="input-group">
+
+<label>العمر</label>
+
+<select id="age">
+
+<option value="">اختر العمر</option>
+
+</select>
+
+</div>
+
+<button type="submit">
+
+دخول الآن
+
+</button>
+
+</form>
+
+<div class="back">
+
+<a href="../index.html">
+
+⬅ العودة للرئيسية
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const age=document.getElementById("age");
+
+for(let i=18;i<=99;i++){
+
+age.innerHTML+=`<option value="${i}">${i}</option>`;
+
+}
+
+document.getElementById("guestForm").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+const name=document.getElementById("guestName").value.trim();
+
+const gender=document.getElementById("gender").value;
+
+const ageValue=document.getElementById("age").value;
+
+if(name.length<3){
+
+alert("المرجو إدخال اسم صالح لدخول الدردشة.");
+
+return;
+
+}
+
+if(!gender){
+
+alert("اختر الجنس.");
+
+return;
+
+}
+
+if(!ageValue){
+
+alert("اختر العمر.");
+
+return;
+
+}
+
+localStorage.setItem("guestName",name);
+
+localStorage.setItem("gender",gender);
+
+localStorage.setItem("age",ageValue);
+
+window.location.href="rooms.html";
+
+});
+
+</script>
+
+</body>
+
+</html>
