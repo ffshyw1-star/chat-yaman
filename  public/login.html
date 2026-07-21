@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>دخول الأعضاء | شات اليمن المطور</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../css/style.css">
+
+</head>
+
+<body>
+
+<div class="overlay">
+
+<div class="login-box">
+
+<h1>🔐 دخول الأعضاء</h1>
+
+<p>
+
+قم بتسجيل الدخول للوصول إلى حسابك.
+
+</p>
+
+<form id="loginForm">
+
+<div class="input-group">
+
+<label>
+
+اسم المستخدم
+
+</label>
+
+<input
+
+type="text"
+
+id="username"
+
+placeholder="اسم المستخدم"
+
+autocomplete="username"
+
+required>
+
+</div>
+
+<div class="input-group">
+
+<label>
+
+كلمة المرور
+
+</label>
+
+<div class="password-box">
+
+<input
+
+type="password"
+
+id="password"
+
+placeholder="********"
+
+autocomplete="current-password"
+
+required>
+
+<button
+
+type="button"
+
+id="showPassword">
+
+👁
+
+</button>
+
+</div>
+
+</div>
+
+<div class="options">
+
+<label>
+
+<input type="checkbox">
+
+تذكرني
+
+</label>
+
+<a href="#">
+
+نسيت كلمة المرور؟
+
+</a>
+
+</div>
+
+<button type="submit">
+
+تسجيل الدخول
+
+</button>
+
+<div id="message"></div>
+
+</form>
+
+<div class="back">
+
+<a href="../index.html">
+
+⬅ العودة للرئيسية
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const pass=document.getElementById("password");
+
+const show=document.getElementById("showPassword");
+
+show.onclick=function(){
+
+if(pass.type==="password"){
+
+pass.type="text";
+
+show.innerHTML="🙈";
+
+}else{
+
+pass.type="password";
+
+show.innerHTML="👁";
+
+}
+
+}
+
+document.getElementById("loginForm").addEventListener("submit",function(e){
+
+e.preventDefault();
+
+const username=document.getElementById("username").value.trim();
+
+const password=document.getElementById("password").value;
+
+const msg=document.getElementById("message");
+
+if(username.length<3){
+
+msg.innerHTML="المرجو إدخال اسم صالح لدخول الدردشة.";
+
+msg.style.color="red";
+
+return;
+
+}
+
+if(password.length<4){
+
+msg.innerHTML="اسم المستخدم أو كلمة المرور خاطئة.";
+
+msg.style.color="red";
+
+return;
+
+}
+
+/* سيتم استبدال هذا لاحقاً بقاعدة البيانات */
+
+localStorage.setItem("member",username);
+
+window.location.href="rooms.html";
+
+});
+
+</script>
+
+</body>
+
+</html>
