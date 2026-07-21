@@ -1,305 +1,202 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>شات اليمن — اختبار WebSocket</title>
-<style>
-:root {
-  --bg-0:#0f1117;--bg-1:#161a26;--bg-2:#1d2333;--bg-3:#252b3d;
-  --primary:#d4a857;--primary-2:#b78a3c;--accent:#c0392b;
-  --success:#2ecc71;--danger:#e74c3c;--text:#ecf0f5;
-  --text-muted:#9aa3b2;--border:rgba(255,255,255,.08);
-  --shadow:0 10px 30px rgba(0,0,0,.35);
-}
-* { box-sizing:border-box; margin:0; padding:0 }
-html, body { height:100% }
-body {
-  font-family: 'Cairo', 'Tahoma', sans-serif;
-  background: var(--bg-0); color: var(--text);
-  direction: rtl; line-height: 1.6;
-}
-button, input, select { font-family: inherit; outline: none }
-input, select {
-  background: var(--bg-2); border: 1px solid var(--border);
-  padding: 9px 12px; border-radius: 8px; color: var(--text); width: 100%;
-}
-button {
-  cursor: pointer; background: var(--bg-2); border: 1px solid var(--border);
-  padding: 9px 16px; border-radius: 8px; color: var(--text);
-  font-weight: 600; transition: .2s;
-}
-button:hover { background: var(--bg-3) }
-button.primary {
-  background: linear-gradient(135deg, var(--primary), var(--primary-2));
-  color: #0a0d15; border: none;
-}
-button.primary:hover { filter: brightness(1.1) }
-.tab.active { background: var(--primary); color: #0a0d15; border-color: var(--primary) }
 
-header {
-  padding: 14px 22px; background: var(--bg-1);
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
-}
-header h1 { font-size: 20px; color: var(--primary) }
-#chatStatus { margin-right: auto; font-size: 13px; color: var(--text-muted) }
-#chatStatus.ok { color: var(--success) }
-#chatStatus.bad { color: var(--danger) }
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-.login {
-  display: flex; align-items: center; justify-content: center;
-  min-height: calc(100vh - 70px); padding: 30px;
-}
-.login-card {
-  background: var(--bg-1); border: 1px solid var(--primary);
-  border-radius: 14px; padding: 32px; width: 100%; max-width: 420px;
-  box-shadow: var(--shadow);
-}
-.login-card h2 { color: var(--primary); margin-bottom: 8px }
-.login-card .desc { color: var(--text-muted); font-size: 13px; margin-bottom: 20px }
-.field { margin-bottom: 14px }
-.field label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 6px }
+<title>شات اليمن المطور</title>
 
-.app { display: flex; flex: 1; min-height: calc(100vh - 70px) }
-.chat-area { flex: 1; display: flex; flex-direction: column; min-width: 0 }
-.history {
-  padding: 10px; background: var(--bg-1);
-  border-bottom: 1px solid var(--border);
-  display: flex; gap: 8px; flex-wrap: wrap;
-}
-.history button { font-size: 12px; padding: 6px 12px }
+<link rel="icon" href="images/favicon.png">
 
-.messages {
-  flex: 1; overflow-y: auto; padding: 18px;
-  display: flex; flex-direction: column; gap: 10px;
-}
-.msg { display: flex; gap: 10px; align-items: flex-start; animation: fIn .3s }
-@keyframes fIn { from { opacity:0; transform: translateY(6px) } to { opacity:1; transform:none } }
-.msg-avatar {
-  width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; color: #fff;
-}
-.msg-content { flex: 1; min-width: 0 }
-.msg-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap }
-.msg-name { font-weight: 700; color: var(--primary) }
-.msg-time { font-size: 11px; color: var(--text-muted) }
-.msg-text {
-  background: var(--bg-2); padding: 10px 14px;
-  border-radius: 14px; border-top-right-radius: 4px;
-  margin-top: 4px; display: inline-block;
-  max-width: 100%; word-wrap: break-word;
-  border: 1px solid var(--border);
-}
-.typing {
-  padding: 6px 18px; font-size: 12px;
-  color: var(--text-muted); font-style: italic;
-  background: var(--bg-1);
-}
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 
-.input-bar {
-  background: var(--bg-1); border-top: 1px solid var(--border);
-  padding: 12px 16px; display: flex; gap: 10px;
-}
-.input-bar input { flex: 1 }
-.input-bar button { background: var(--primary); color: #0a0d15; border: none; min-width: 80px }
+<link rel="stylesheet" href="css/style.css">
 
-.sidebar {
-  width: 280px; background: var(--bg-1);
-  border-left: 1px solid var(--border); padding: 14px;
-  overflow-y: auto; flex-shrink: 0;
-}
-.sidebar h3 {
-  font-size: 13px; color: var(--primary);
-  margin-bottom: 10px; padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.online-count { color: var(--text-muted); font-size: 11px }
-.online-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 8px 10px; border-radius: 8px;
-  transition: .15s; cursor: pointer;
-}
-.online-row:hover { background: var(--bg-2) }
-.online-row .av {
-  position: relative; width: 36px; height: 36px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px;
-}
-.online-row .av .dot {
-  position: absolute; bottom: 0; left: 0;
-  width: 11px; height: 11px; border-radius: 50%;
-  background: var(--success); border: 2px solid #161a26;
-}
-.online-row .nm { flex: 1; font-weight: 700; font-size: 14px }
-.online-row .r { color: var(--primary); font-size: 12px }
+<link rel="stylesheet" href="css/responsive.css">
 
-.toast {
-  position: fixed; bottom: 30px; left: 50%; transform: translate(-50%, 100px);
-  background: var(--primary); color: #0a0d15;
-  padding: 12px 22px; border-radius: 30px; font-weight: 600;
-  font-size: 14px; z-index: 999; opacity: 0; transition: .3s;
-}
-.toast.show { opacity: 1; transform: translate(-50%, 0) }
+<link rel="stylesheet" href="css/animation.css">
 
-@media (max-width: 768px) {
-  .sidebar { display: none }
-  .app { flex-direction: column }
-}
-</style>
 </head>
+
 <body>
 
+<div class="overlay">
+
 <header>
-  <h1>🇾🇪 شات اليمن — <span style="font-size:13px;color:var(--text-muted)">WebSocket تجريبي</span></h1>
-  <span id="chatStatus">⚪ غير متصل</span>
-  <button id="logoutBtn" style="display:none" onclick="doLogout()">🚪 خروج</button>
+
+<div class="logo">
+
+<img src="images/logo.png">
+
+<h1>شات اليمن المطور</h1>
+
+<p>دردشة عربية آمنة وسريعة</p>
+
+</div>
+
 </header>
 
-<div class="login" id="loginScreen">
-  <div class="login-card">
-    <h2>👋 مرحباً بك</h2>
-    <p class="desc">أدخل بياناتك للانضمام للمحادثة الحية عبر WebSocket</p>
-    <div class="field">
-      <label>الاسم في الشات</label>
-      <input type="text" id="loginName" value="زائر_تجريبي">
-    </div>
-    <div class="field">
-      <label>الرتبة</label>
-      <select id="loginRole">
-        <option value="guest">👤 زائر</option>
-        <option value="member" selected>🟢 عضو</option>
-        <option value="vip">💎 مميز</option>
-        <option value="mod">🛡️ مشرف</option>
-        <option value="admin">☆ إدارة</option>
-        <option value="super">⭐ ادمن</option>
-        <option value="owner">👑 مالك</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>الدولة</label>
-      <select id="loginCountry">
-        <option value="🇾🇪">🇾🇪 اليمن</option>
-        <option value="🇸🇦">🇸🇦 السعودية</option>
-        <option value="🇪🇬">🇪🇬 مصر</option>
-        <option value="🇩🇿">🇩🇿 الجزائر</option>
-        <option value="🇲🇦">🇲🇦 المغرب</option>
-      </select>
-    </div>
-    <button class="primary" style="width:100%" onclick="doLogin()">
-      🚀 دخول للمحادثة الحية
-    </button>
-    <p style="margin-top:14px;font-size:11px;color:var(--text-muted);text-align:center">
-      💡 افتح نافذة أو متصفحاً ثانياً بنفس الاسم لترى المحادثة الحية
-    </p>
-  </div>
+<section class="hero">
+
+<div class="hero-content">
+
+<h2>
+
+أهلاً بك في شات اليمن المطور
+
+</h2>
+
+<p>
+
+منصة دردشة عربية حديثة تعمل مباشرة من المتصفح وتوفر غرفاً عامة ورسائل خاصة وملفات شخصية وإضافة أصدقاء ضمن بيئة آمنة ومحترمة.
+
+</p>
+
+<div class="buttons">
+
+<a href="pages/guest.html" class="guest">
+
+👤 دخول الزوار
+
+</a>
+
+<a href="pages/login.html" class="member">
+
+🔐 دخول الأعضاء
+
+</a>
+
+<a href="pages/register.html" class="register">
+
+📝 إنشاء حساب جديد
+
+</a>
+
 </div>
 
-<div class="app" id="chatApp" style="display:none">
-  <main class="chat-area">
-    <div class="history" id="roomTabs"></div>
-    <div class="messages" id="messages"></div>
-    <div class="typing" id="typingIndicator" style="display:none"></div>
-    <div class="input-bar">
-      <input type="text" id="msgInput" placeholder="اكتب رسالتك هنا..." onkeydown="if(event.key==='Enter')doSend()">
-      <button onclick="doSend()">➤ إرسال</button>
-    </div>
-  </main>
-  <aside class="sidebar">
-    <h3>
-      👥 المتواجدون
-      <span class="online-count" id="onlineCount">0</span>
-    </h3>
-    <div id="onlineList"></div>
-  </aside>
 </div>
 
-<div class="toast" id="toast"></div>
+</section>
 
-<script src="/chat-client.js"></script>
-<script>
-function doLogin() {
-  const name = document.getElementById('loginName').value.trim() || 'زائر';
-  const role = document.getElementById('loginRole').value;
-  const country = document.getElementById('loginCountry').value;
-  YemenChat.login(name, role, country)
-    .then(() => {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('chatApp').style.display = 'flex';
-      document.getElementById('logoutBtn').style.display = 'inline-flex';
-      renderRoomTabs();
-      showToast('✅ تم الاتصال بالخادم');
-    })
-    .catch(e => { showToast('❌ فشل: ' + e.message); });
-}
+<section class="about">
 
-function doLogout() {
-  YemenChat.disconnect();
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('chatApp').style.display = 'none';
-  document.getElementById('logoutBtn').style.display = 'none';
-  document.getElementById('messages').innerHTML = '';
-  showToast('تم قطع الاتصال');
-}
+<h2>
 
-function doSend() {
-  const inp = document.getElementById('msgInput');
-  const text = inp.value.trim();
-  if (!text) return;
-  if (YemenChat.sendMessage(text)) {
-    inp.value = '';
-    YemenChat.typing(false);
-  }
-}
+عن الموقع
 
-function renderRoomTabs() {
-  const tabs = document.getElementById('roomTabs');
-  tabs.innerHTML = '';
-  const rooms = window.YEMEN_ROOMS || {};
-  Object.entries(rooms).forEach(([id, label]) => {
-    const b = document.createElement('button');
-    b.textContent = label;
-    b.dataset.room = id;
-    if (id === YemenChat.currentRoom) b.classList.add('active');
-    b.onclick = () => {
-      YemenChat.joinRoom(id);
-      tabs.querySelectorAll('button').forEach(x => x.classList.remove('active'));
-      b.classList.add('active');
-    };
-    tabs.appendChild(b);
-  });
-}
+</h2>
 
-YemenChat.on('room_joined', () => renderRoomTabs());
-YemenChat.on('user_joined', u => showToast('👋 ' + u.name + ' انضم'));
-YemenChat.on('user_left', u => showToast('🚪 ' + u.name + ' غادر'));
-YemenChat.on('private_message', pm => showToast('✉️ رسالة خاصة من ' + pm.from.name));
-YemenChat.on('reconnecting', r => {
-  document.getElementById('chatStatus').textContent =
-    '🟡 إعادة الاتصال... (' + r.attempt + '/' + YemenChat.maxReconnect + ')';
-});
+<p>
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  clearTimeout(window._tTimer);
-  window._tTimer = setTimeout(() => t.classList.remove('show'), 2400);
-}
+يهدف شات اليمن المطور إلى توفير مجتمع دردشة عربي حديث يجمع الأصدقاء في مكان واحد مع تصميم سريع ومتوافق مع جميع الأجهزة.
 
-window.addEventListener('load', () => {
-  if (YemenChat.resume()) {
-    const lastName = localStorage.getItem('yemen_chat_name');
-    document.getElementById('loginName').value = lastName || 'زائر';
-  }
-});
-document.getElementById('loginName').addEventListener('change', e => {
-  try { localStorage.setItem('yemen_chat_name', e.target.value); } catch (e) {}
-});
-</script>
+</p>
+
+</section>
+
+<section class="features">
+
+<h2>
+
+مميزات الموقع
+
+</h2>
+
+<div class="cards">
+
+<div class="card">
+
+💬
+
+<h3>دردشة عامة</h3>
+
+</div>
+
+<div class="card">
+
+✉️
+
+<h3>رسائل خاصة</h3>
+
+</div>
+
+<div class="card">
+
+👥
+
+<h3>إضافة أصدقاء</h3>
+
+</div>
+
+<div class="card">
+
+❤️
+
+<h3>إعجابات</h3>
+
+</div>
+
+<div class="card">
+
+🎤
+
+<h3>رسائل صوتية</h3>
+
+</div>
+
+<div class="card">
+
+🛡️
+
+<h3>حماية وأمان</h3>
+
+</div>
+
+</div>
+
+</section>
+
+<section class="policy">
+
+<h2>
+
+سياسة الموقع
+
+</h2>
+
+<ul>
+
+<li>احترام جميع الأعضاء.</li>
+
+<li>منع الإساءة والسب.</li>
+
+<li>منع انتحال الشخصيات.</li>
+
+<li>منع الاحتيال.</li>
+
+<li>الإدارة تراجع جميع البلاغات.</li>
+
+</ul>
+
+</section>
+
+<footer>
+
+<p>
+
+© 2026 شات اليمن المطور
+
+</p>
+
+</footer>
+
+</div>
+
+<script src="js/app.js"></script>
+
 </body>
+
 </html>
