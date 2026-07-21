@@ -30,12 +30,6 @@ const RATE_WINDOW_MS = 30_000;
 const RATE_MAX = 20;
 const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 const VALID_ROLES = ['guest', 'member', 'vip', 'mod', 'admin', 'super', 'owner'];
-const STATIC_FILES = {
-  '/': 'index.html',
-  '/index.html': 'index.html',
-  '/chat-client.js': 'chat-client.js',
-  '/admin.html': 'admin.html'
-};
 
 // ===== حالة في الذاكرة =====
 const roomHistory = new Map();
@@ -170,24 +164,39 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // الملفات الثابتة
-  if (req.method === 'GET' && STATIC_FILES[parsed.pathname]) {
-    const filePath = path.join(__dirname, 'public', STATIC_FILES[parsed.pathname]);
+  // الملفات الثابتة - قراءة واستدعاء آلي مرن من مجلد public
+  if (req.method === 'GET') {
+    let targetFile = parsed.pathname === '/' ? '/index.html' : parsed.pathname;
+    const filePath = path.join(__dirname, 'public', targetFile);
     const ext = path.extname(filePath).toLowerCase();
+    
     const mime = {
       '.html': 'text/html; charset=utf-8',
       '.js': 'application/javascript; charset=utf-8',
-      '.css': 'text/css; charset=utf-8'
+      '.css': 'text/css; charset=utf-8',
+      '.png': 'image/png',
+      '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg',
+      '.gif': 'image/gif',
+      '.svg': 'image/svg+xml',
+      '.ico': 'image/x-icon'
     }[ext] || 'application/octet-stream';
-    fs.readFile(filePath, (err, data) => {
-      if (err) { res.writeHead(404); return res.end('Not found'); }
-      res.writeHead(200, { 'Content-Type': mime, 'Cache-Control': 'no-cache' });
-      res.end(data);
-    });
-    return;
-  }
 
-  res.writeHead(404, CORS); res.end('Not found');
+    fs.readFile(filePath, (err, data) => {
+      if (!err) {
+        res.writeHead(200, { 'Content-Type': mime, 'Cache-Control': 'no-cache' });
+        return res.end(data);
+      }
+      
+      // إذا كان الملف يخص الواجهة ولم يتم العثور عليه
+      if (parsed.pathname === '/' || targetFile === '/index.html' || ext === '.html' || ext === '.js' || ext === '.css') {
+        res.writeHead(404, CORS); 
+        return res.end('Not found');
+      }
+    });
+
+    if (parsed.pathname === '/' || ext === '.html' || ext === '.js' || ext === '.css') return;
+  }
 });
 
 // ===== خادم WebSocket =====
@@ -258,7 +267,6 @@ wss.on('connection', (ws, req) => {
 
 function handleMessage(ws, msg) {
   switch (msg.type) {
-
     case 'join_room': {
       const room = ROOMS.includes(msg.room) ? msg.room : 'global';
 
@@ -275,134 +283,50 @@ function handleMessage(ws, msg) {
       ws.currentRoom = room;
       const users = onlineUsers.get(room);
       users.set(ws.userId, {
-        ws, userId: ws.userId,
-        name: ws.userName, role: ws.userRole, country: ws.userCountry
+        ws, userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry
       });
 
-      const onlineArr = getOnlineList(room);
       sendTo(ws, 'room_joined', {
-        room, label: ROOM_LABELS[room],
+        room,
         history: roomHistory.get(room),
-        online: onlineArr, count: users.size
+        users: getOnlineList(room)
       });
 
       broadcast(room, 'user_joined', {
-        userId: ws.userId, name: ws.userName,
-        role: ws.userRole, country: ws.userCountry
+        userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry
       }, ws.userId);
 
-      broadcast(room, 'online', { users: onlineArr, count: users.size });
+      broadcast(room, 'online', { users: getOnlineList(room), count: users.size });
       break;
     }
 
-    case 'send_message': {
-      if (!ws.currentRoom) {
-        return sendTo(ws, 'error', { message: 'انضم لغرفة أولاً' });
-      }
+    case 'msg': {
+      if (!ws.currentRoom) return;
+      const text = sanitize(msg.text);
+      if (!text) return;
 
       const now = Date.now();
-      ws.rateBuckets = ws.rateBuckets.filter(t => now - t < RATE_WINDOW_MS);
+      ws.rateBuckets = ws.rateBuckets.filter(ts => now - ts < RATE_WINDOW_MS);
       if (ws.rateBuckets.length >= RATE_MAX) {
-        return sendTo(ws, 'error', {
-          code: 'RATE_LIMIT',
-          message: 'تجاوزت حد الرسائل المسموح، حاول بعد ' +
-                   Math.ceil(RATE_WINDOW_MS / 1000) + ' ثانية'
-        });
+        sendTo(ws, 'error', { message: 'لقد أرسلت رسائل كثيرة جداً، يرجى الانتظار قليلاً' });
+        return;
       }
-
-      const text = sanitize(msg.text || '');
-      if (!text.trim()) {
-        return sendTo(ws, 'error', { message: 'الرسالة فارغة' });
-      }
-
       ws.rateBuckets.push(now);
 
-      const message = {
-        id: crypto.randomBytes(8).toString('hex'),
-        userId: ws.userId, name: ws.userName,
-        role: ws.userRole, country: ws.userCountry,
+      const messageItem = {
+        msgId: crypto.randomBytes(6).toString('hex'),
+        userId: ws.userId,
+        name: ws.userName,
+        role: ws.userRole,
+        country: ws.userCountry,
         text,
-        time: new Date().toLocaleTimeString('ar-EG', {
-          hour: '2-digit', minute: '2-digit', hour12: false
-        }),
-        date: new Date().toLocaleDateString('ar-EG'),
         ts: now
       };
 
-      addToHistory(ws.currentRoom, message);
-      broadcast(ws.currentRoom, 'message', message);
+      addToHistory(ws.currentRoom, messageItem);
+      broadcast(ws.currentRoom, 'msg', messageItem);
       break;
     }
-
-    case 'typing': {
-      if (!ws.currentRoom) return;
-      broadcast(ws.currentRoom, 'typing', {
-        userId: ws.userId, name: ws.userName, isTyping: !!msg.isTyping
-      }, ws.userId);
-      break;
-    }
-
-    case 'private_message': {
-      const targetId = msg.targetUserId;
-      const targetRoom = msg.targetRoom || ws.currentRoom;
-      if (!targetId || !onlineUsers.has(targetRoom)) return;
-      const users = onlineUsers.get(targetRoom);
-      const target = users.get(targetId);
-      if (!target) return sendTo(ws, 'error', { message: 'المستلم غير متصل' });
-      const text = sanitize(msg.text || '');
-      if (!text.trim()) return;
-      const pm = {
-        id: crypto.randomBytes(8).toString('hex'),
-        from: { userId: ws.userId, name: ws.userName, country: ws.userCountry },
-        text,
-        time: new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', hour12: false }),
-        ts: Date.now()
-      };
-      sendTo(target.ws, 'private_message', pm);
-      sendTo(ws, 'private_sent', pm);
-      break;
-    }
-
-    case 'ping':
-      sendTo(ws, 'pong', { ts: Date.now() });
-      break;
-
-    default:
-      sendTo(ws, 'error', { message: 'نوع رسالة غير معروف: ' + msg.type });
   }
 }
 
-// Heartbeat — قتل الاتصالات الميتة
-const heartbeat = setInterval(() => {
-  wss.clients.forEach(ws => {
-    if (!ws.isAlive) {
-      try { ws.terminate(); } catch (e) {}
-      return;
-    }
-    ws.isAlive = false;
-    try { ws.ping(); } catch (e) {}
-  });
-}, 30_000);
-
-wss.on('close', () => clearInterval(heartbeat));
-
-// ===== بدء التشغيل =====
-server.listen(PORT, HOST, () => {
-  console.log('=========================================');
-  console.log('🇾🇪  خادم شات اليمن المطور');
-  console.log('=========================================');
-  console.log('✅ يعمل على:  http://localhost:' + PORT);
-  console.log('📡 WebSocket: ws://localhost:' + PORT + '/?token=...');
-  console.log('🌍 الغرف:    ' + ROOMS.join(', '));
-  console.log('💚 الحالة:  جاهز لاستقبال الاتصالات');
-  console.log('=========================================');
-});
-
-function shutdown() {
-  console.log('\n🛑 إيقاف الخادم...');
-  wss.clients.forEach(ws => { try { ws.close(1001); } catch (e) {} });
-  server.close(() => process.exit(0));
-  setTimeout(() => process.exit(1), 5000).unref();
-}
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
