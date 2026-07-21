@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>الغرف | شات اليمن المطور</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="../css/style.css">
+
+</head>
+
+<body>
+
+<div class="overlay">
+
+<header class="rooms-header">
+
+<div class="profile">
+
+<img src="../images/default-avatar.png" class="avatar">
+
+<div>
+
+<h2 id="userName">مرحباً بك</h2>
+
+<span class="status">
+🟢 متصل
+</span>
+
+</div>
+
+</div>
+
+<div class="menu">
+
+☰
+
+</div>
+
+</header>
+
+<section class="rooms">
+
+<h1>
+
+🌎 اختر الغرفة
+
+</h1>
+
+<p>
+
+اختر إحدى الغرف التالية للدخول إلى الدردشة.
+
+</p>
+
+<div class="room-card" onclick="joinRoom('العامة')">
+
+<div>
+
+🌍 الغرفة العامة
+
+</div>
+
+<span>
+
+➜
+
+</span>
+
+</div>
+
+<div class="room-card" onclick="joinRoom('اليمن')">
+
+<div>
+
+🇾🇪 غرفة اليمن
+
+</div>
+
+<span>
+
+➜
+
+</span>
+
+</div>
+
+<div class="room-card" onclick="joinRoom('السعودية')">
+
+<div>
+
+🇸🇦 غرفة السعودية
+
+</div>
+
+<span>
+
+➜
+
+</span>
+
+</div>
+
+<div class="room-card" onclick="joinRoom('مصر')">
+
+<div>
+
+🇪🇬 غرفة مصر
+
+</div>
+
+<span>
+
+➜
+
+</span>
+
+</div>
+
+<div class="room-card" onclick="joinRoom('الجزائر')">
+
+<div>
+
+🇩🇿 غرفة الجزائر
+
+</div>
+
+<span>
+
+➜
+
+</span>
+
+</div>
+
+</section>
+
+<footer>
+
+<button id="logout">
+
+🚪 تسجيل خروج
+
+</button>
+
+</footer>
+
+</div>
+
+<script>
+
+const guest=localStorage.getItem("guestName");
+const member=localStorage.getItem("member");
+
+document.getElementById("userName").innerHTML=
+
+"مرحباً "+(guest||member||"زائر");
+
+function joinRoom(room){
+
+localStorage.setItem("room",room);
+
+window.location.href="chat.html";
+
+}
+
+document.getElementById("logout").onclick=function(){
+
+localStorage.clear();
+
+window.location.href="../index.html";
+
+}
+
+</script>
+
+</body>
+
+</html>
