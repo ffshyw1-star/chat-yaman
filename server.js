@@ -14,7 +14,6 @@ const { URL } = require('url');
 const { WebSocketServer } = require('ws');
 
 // ===== الإعدادات =====
-// قمنا بضبط المنفذ ليدعم القراءة التلقائية من بيئة Render بشكل صحيح
 const PORT = process.env.PORT || 10000;
 const HOST = '0.0.0.0';
 const ROOMS = ['global', 'yemen', 'algeria', 'egypt', 'saudi', 'morocco'];
@@ -50,7 +49,6 @@ setInterval(() => {
 }, 60 * 60 * 1000);
 
 // ===== أدوات أساسية =====
-
 function createSession({ name, role, country }) {
   const token = crypto.randomBytes(20).toString('hex');
   sessions.set(token, {
@@ -63,7 +61,6 @@ function createSession({ name, role, country }) {
   return token;
 }
 
-/** تعقيم النص لمنع XSS */
 function sanitize(str) {
   if (typeof str !== 'string') return '';
   return str.slice(0, 500)
@@ -77,8 +74,7 @@ function sanitize(str) {
 
 function sendTo(ws, type, payload) {
   if (ws.readyState === 1) {
-    try { ws.send(JSON.stringify({ type, payload, ts: Date.now() })); }
-    catch (e) { /* ignore */ }
+    try { ws.send(JSON.stringify({ type, payload, ts: Date.now() })); } catch (e) {}
   }
 }
 
@@ -88,7 +84,7 @@ function broadcast(room, type, payload, exceptUserId = null) {
   const data = JSON.stringify({ type, room, payload, ts: Date.now() });
   for (const [id, info] of users) {
     if (id !== exceptUserId && info.ws.readyState === 1) {
-      try { info.ws.send(data); } catch (e) { /* ignore */ }
+      try { info.ws.send(data); } catch (e) {}
     }
   }
 }
@@ -122,28 +118,22 @@ const server = http.createServer((req, res) => {
     res.writeHead(204, CORS); return res.end();
   }
 
-  // POST /api/login
   if (req.method === 'POST' && parsed.pathname === '/api/login') {
     let body = '';
     req.on('data', chunk => {
       body += chunk;
       if (body.length > 2048) {
-        req.destroy();
-        res.writeHead(413, CORS); res.end('Too large');
+        req.destroy(); res.writeHead(413, CORS); res.end('Too large');
       }
     });
     req.on('end', () => {
       try {
         const data = JSON.parse(body || '{}');
-        const token = createSession({
-          name: data.name, role: data.role, country: data.country
-        });
+        const token = createSession({ name: data.name, role: data.role, country: data.country });
         const s = sessions.get(token);
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', ...CORS });
         res.end(JSON.stringify({
-          ok: true, token, userId: s.userId,
-          name: s.name, role: s.role, country: s.country,
-          rooms: ROOMS, labels: ROOM_LABELS
+          ok: true, token, userId: s.userId, name: s.name, role: s.role, country: s.country, rooms: ROOMS, labels: ROOM_LABELS
         }));
       } catch (e) {
         res.writeHead(400, CORS); res.end(JSON.stringify({ ok: false, error: 'bad_json' }));
@@ -152,37 +142,26 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // GET /api/health
   if (req.method === 'GET' && parsed.pathname === '/api/health') {
     const stats = {
-      ok: true,
-      uptime: process.uptime(),
+      ok: true, uptime: process.uptime(),
       totalOnline: Array.from(onlineUsers.values()).reduce((sum, m) => sum + m.size, 0),
       rooms: ROOMS.map(r => ({ id: r, label: ROOM_LABELS[r], online: onlineUsers.get(r).size })),
-      sessions: sessions.size,
-      memory: process.memoryUsage()
+      sessions: sessions.size, memory: process.memoryUsage()
     };
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', ...CORS });
-    res.end(JSON.stringify(stats));
-    return;
+    res.end(JSON.stringify(stats)); return;
   }
 
-  // الملفات الثابتة - قراءة واستدعاء آلي مرن من مجلد public
   if (req.method === 'GET') {
     let targetFile = parsed.pathname === '/' ? '/index.html' : parsed.pathname;
     const filePath = path.join(__dirname, 'public', targetFile);
     const ext = path.extname(filePath).toLowerCase();
     
     const mime = {
-      '.html': 'text/html; charset=utf-8',
-      '.js': 'application/javascript; charset=utf-8',
-      '.css': 'text/css; charset=utf-8',
-      '.png': 'image/png',
-      '.jpg': 'image/jpeg',
-      '.jpeg': 'image/jpeg',
-      '.gif': 'image/gif',
-      '.svg': 'image/svg+xml',
-      '.ico': 'image/x-icon'
+      '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8',
+      '.css': 'text/css; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg',
+      '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.svg': 'image/svg+xml', '.ico': 'image/x-icon'
     }[ext] || 'application/octet-stream';
 
     fs.readFile(filePath, (err, data) => {
@@ -190,14 +169,10 @@ const server = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': mime, 'Cache-Control': 'no-cache' });
         return res.end(data);
       }
-      
-      // إذا كان الملف يخص الواجهة ولم يتم العثور عليه
       if (parsed.pathname === '/' || targetFile === '/index.html' || ext === '.html' || ext === '.js' || ext === '.css') {
-        res.writeHead(404, CORS); 
-        return res.end('Not found');
+        res.writeHead(404, CORS); return res.end('Not found');
       }
     });
-
     if (parsed.pathname === '/' || ext === '.html' || ext === '.js' || ext === '.css') return;
   }
 });
@@ -212,8 +187,7 @@ wss.on('connection', (ws, req) => {
 
   if (!session) {
     sendTo(ws, 'error', { code: 'AUTH_REQUIRED', message: 'يجب تسجيل الدخول أولاً' });
-    setTimeout(() => ws.close(4001, 'Unauthorized'), 100);
-    return;
+    setTimeout(() => ws.close(4001, 'Unauthorized'), 100); return;
   }
 
   ws.userId = session.userId;
@@ -223,105 +197,66 @@ wss.on('connection', (ws, req) => {
   ws.currentRoom = null;
   ws.rateBuckets = [];
   ws.isAlive = true;
-  ws.joinedAt = Date.now();
 
   sendTo(ws, 'auth_ok', {
-    userId: ws.userId, name: ws.userName,
-    role: ws.userRole, country: ws.userCountry,
-    rooms: ROOMS, labels: ROOM_LABELS
+    userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry, rooms: ROOMS, labels: ROOM_LABELS
   });
 
   ws.on('pong', () => { ws.isAlive = true; });
 
   ws.on('message', raw => {
-    if (raw.length > 4096) {
-      sendTo(ws, 'error', { message: 'الرسالة كبيرة جداً' });
-      return;
-    }
+    if (raw.length > 4096) return sendTo(ws, 'error', { message: 'الرسالة كبيرة جداً' });
     let msg;
-    try { msg = JSON.parse(raw.toString()); }
-    catch {
-      sendTo(ws, 'error', { code: 'BAD_JSON', message: 'بيانات غير صالحة' });
-      return;
+    try { msg = JSON.parse(raw.toString()); } catch { return sendTo(ws, 'error', { code: 'BAD_JSON', message: 'بيانات غير صالحة' }); }
+    if (!msg || typeof msg.type !== 'string') return sendTo(ws, 'error', { message: 'نوع الرسالة مفقود' });
+    
+    // معالجة الرسائل المستلمة في الـ WebSocket
+    if (msg.type === 'join_room') {
+      const room = ROOMS.includes(msg.room) ? msg.room : 'global';
+      if (ws.currentRoom && onlineUsers.has(ws.currentRoom)) {
+        const prev = onlineUsers.get(ws.currentRoom);
+        if (prev && prev.delete(ws.userId)) {
+          broadcast(ws.currentRoom, 'user_left', { userId: ws.userId, name: ws.userName });
+          broadcast(ws.currentRoom, 'online', { users: getOnlineList(ws.currentRoom), count: prev.size });
+        }
+      }
+      ws.currentRoom = room;
+      const users = onlineUsers.get(room);
+      if (users) {
+        users.set(ws.userId, { ws, userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry });
+        sendTo(ws, 'room_joined', { room, history: roomHistory.get(room) || [], users: getOnlineList(room) });
+        broadcast(room, 'user_joined', { userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry }, ws.userId);
+        broadcast(room, 'online', { users: getOnlineList(room), count: users.size });
+      }
+    } else if (msg.type === 'msg') {
+      if (!ws.currentRoom) return;
+      const text = sanitize(msg.text); if (!text) return;
+      const now = Date.now();
+      ws.rateBuckets = ws.rateBuckets.filter(ts => now - ts < RATE_WINDOW_MS);
+      if (ws.rateBuckets.length >= RATE_MAX) return sendTo(ws, 'error', { message: 'لقد أرسلت رسائل كثيرة جداً، يرجى الانتظار قليلاً' });
+      ws.rateBuckets.push(now);
+
+      const messageItem = { msgId: crypto.randomBytes(6).toString('hex'), userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry, text, ts: now };
+      addToHistory(ws.currentRoom, messageItem);
+      broadcast(ws.currentRoom, 'msg', messageItem);
     }
-    if (!msg || typeof msg.type !== 'string') {
-      sendTo(ws, 'error', { message: 'نوع الرسالة مفقود' });
-      return;
-    }
-    handleMessage(ws, msg);
   });
 
   ws.on('close', () => {
     if (ws.currentRoom && onlineUsers.has(ws.currentRoom)) {
       const users = onlineUsers.get(ws.currentRoom);
-      if (users.delete(ws.userId)) {
+      if (users && users.delete(ws.userId)) {
         broadcast(ws.currentRoom, 'user_left', { userId: ws.userId, name: ws.userName });
-        broadcast(ws.currentRoom, 'online', {
-          users: getOnlineList(ws.currentRoom), count: users.size
-        });
+        broadcast(ws.currentRoom, 'online', { users: getOnlineList(ws.currentRoom), count: users.size });
       }
     }
-  });
-
-  ws.on('error', err => {
-    console.error(`⚠️ خطأ في اتصال ${ws.userName}:`, err.message);
   });
 });
 
-function handleMessage(ws, msg) {
-  switch (msg.type) {
-    case 'join_room': {
-      const room = ROOMS.includes(msg.room) ? msg.room : 'global';
-
-      if (ws.currentRoom && onlineUsers.has(ws.currentRoom)) {
-        const prev = onlineUsers.get(ws.currentRoom);
-        if (prev && prev.delete(ws.userId)) {
-          broadcast(ws.currentRoom, 'user_left', { userId: ws.userId, name: ws.userName });
-          broadcast(ws.currentRoom, 'online', {
-            users: getOnlineList(ws.currentRoom), count: prev.size
-          });
-        }
-      }
-
-      ws.currentRoom = room;
-      const users = onlineUsers.get(room);
-      if (users) {
-        users.set(ws.userId, {
-          ws, userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry
-        });
-
-        sendTo(ws, 'room_joined', {
-          room,
-          history: roomHistory.get(room) || [],
-          users: getOnlineList(room)
-        });
-
-        broadcast(room, 'user_joined', {
-          userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry
-        }, ws.userId);
-
-        broadcast(room, 'online', { users: getOnlineList(room), count: users.size });
-      }
-      break;
-    }
-
-    case 'msg': {
-      if (!ws.currentRoom) return;
-      const text = sanitize(msg.text);
-      if (!text) return;
-
-      const now = Date.now();
-      ws.rateBuckets = ws.rateBuckets.filter(ts => now - ts < RATE_WINDOW_MS);
-      if (ws.rateBuckets.length >= RATE_MAX) {
-        sendTo(ws, 'error', { message: 'لقد أرسلت رسائل كثيرة جداً، يرجى الانتظار قليلاً' });
-        return;
-      }
-      ws.rateBuckets.push(now);
-
-      const messageItem = {
-        msgId: crypto.randomBytes(6).toString('hex'),
-        userId: ws.userId,
-        name: ws.userName,
-        role: ws.userRole,
-        country: ws.userCountry,
-        text,
+// ===== تشغيل الخادم والربط الدقيق والمستقر بنظام Render =====
+server.listen(PORT, HOST, () => {
+  console.log('=========================================');
+  console.log('🇾🇪  خادم شات اليمن المطور يعمل بنجاح');
+  console.log(`📡 جاهز ومستقر على المنفذ: ${PORT}`);
+  console.log('=========================================');
+});
