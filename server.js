@@ -14,8 +14,9 @@ const { URL } = require('url');
 const { WebSocketServer } = require('ws');
 
 // ===== الإعدادات =====
-const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST || '0.0.0.0';
+// قمنا بضبط المنفذ ليدعم القراءة التلقائية من بيئة Render بشكل صحيح
+const PORT = process.env.PORT || 10000;
+const HOST = '0.0.0.0';
 const ROOMS = ['global', 'yemen', 'algeria', 'egypt', 'saudi', 'morocco'];
 const ROOM_LABELS = {
   global: '🌎 غرفة العامة',
@@ -94,6 +95,7 @@ function broadcast(room, type, payload, exceptUserId = null) {
 
 function getOnlineList(room) {
   const users = onlineUsers.get(room);
+  if (!users) return [];
   return Array.from(users.values()).map(u => ({
     userId: u.userId, name: u.name, role: u.role, country: u.country
   }));
@@ -101,6 +103,7 @@ function getOnlineList(room) {
 
 function addToHistory(room, message) {
   const history = roomHistory.get(room);
+  if (!history) return;
   history.push(message);
   if (history.length > MAX_HISTORY) history.shift();
 }
@@ -272,7 +275,7 @@ function handleMessage(ws, msg) {
 
       if (ws.currentRoom && onlineUsers.has(ws.currentRoom)) {
         const prev = onlineUsers.get(ws.currentRoom);
-        if (prev.delete(ws.userId)) {
+        if (prev && prev.delete(ws.userId)) {
           broadcast(ws.currentRoom, 'user_left', { userId: ws.userId, name: ws.userName });
           broadcast(ws.currentRoom, 'online', {
             users: getOnlineList(ws.currentRoom), count: prev.size
@@ -282,21 +285,23 @@ function handleMessage(ws, msg) {
 
       ws.currentRoom = room;
       const users = onlineUsers.get(room);
-      users.set(ws.userId, {
-        ws, userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry
-      });
+      if (users) {
+        users.set(ws.userId, {
+          ws, userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry
+        });
 
-      sendTo(ws, 'room_joined', {
-        room,
-        history: roomHistory.get(room),
-        users: getOnlineList(room)
-      });
+        sendTo(ws, 'room_joined', {
+          room,
+          history: roomHistory.get(room) || [],
+          users: getOnlineList(room)
+        });
 
-      broadcast(room, 'user_joined', {
-        userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry
-      }, ws.userId);
+        broadcast(room, 'user_joined', {
+          userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry
+        }, ws.userId);
 
-      broadcast(room, 'online', { users: getOnlineList(room), count: users.size });
+        broadcast(room, 'online', { users: getOnlineList(room), count: users.size });
+      }
       break;
     }
 
@@ -320,13 +325,3 @@ function handleMessage(ws, msg) {
         role: ws.userRole,
         country: ws.userCountry,
         text,
-        ts: now
-      };
-
-      addToHistory(ws.currentRoom, messageItem);
-      broadcast(ws.currentRoom, 'msg', messageItem);
-      break;
-    }
-  }
-}
-
