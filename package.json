@@ -5,11 +5,12 @@
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
+    "install": "yarn install",
     "start": "node server.js",
-    "dev": "node server.js"
+    "build": "yarn install"
   },
   "engines": {
-    "node": ">=20.0.0 <23.0.0"
+    "node": "20.x"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
