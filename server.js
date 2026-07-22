@@ -141,54 +141,89 @@ app.get('/api/users', async (req, res) => {
     res.json({ success: true, users: onlineUsers });
 });
 
+// إدارة اتصالات الـ Socket
 io.on('connection', async (socket) => {
-    const sessionUser = socket.handshake.session.user;
+    const sessionUser = socket.handshake.session?.user;
     if (!sessionUser) { socket.disconnect(); return; }
+    
     const dbUser = await User.findById(sessionUser.id);
-    if (!dbUser || dbUser.banned) { socket.emit('kick-ban', { message: 'تم حظرك من السيرفر' }); socket.disconnect(); return; }
+    if (!dbUser || dbUser.banned) { 
+        socket.emit('kick-ban', { message: 'تم حظرك من السيرفر' }); 
+        socket.disconnect(); 
+        return; 
+    }
 
     socket.on('join-room', async (roomId) => {
-        socket.join(roomId); socket.currentRoom = roomId;
+        socket.join(roomId); 
+        socket.currentRoom = roomId;
         const roomMessages = await Message.find({ room: roomId }).sort({ timestamp: -1 }).limit(50);
         socket.emit('load-messages', roomMessages.reverse());
         socket.to(roomId).emit('user-joined', { id: dbUser._id, username: dbUser.username, rank: dbUser.rank });
+        
+        // تحديث قائمة المتواجدين للجميع عند دخول مستخدم جديد
+        const onlineUsers = await User.find({ status: '🟢 متصل' }).select('-password');
+        io.emit('update-user-list', onlineUsers);
     });
 
     socket.on('send-message', async (data) => {
-        const { room, text } = data; if (!text || !text.trim()) return;
+        const { room, text } = data; 
+        if (!text || !text.trim()) return;
+        
         const currentUser = await User.findById(sessionUser.id);
-        if (!currentUser || currentUser.banned) { socket.emit('kick-ban', { message: 'أنت محظور' }); return socket.disconnect(); }
-        if (currentUser.muted) { socket.emit('system-alert', { message: '🤐 تم كتم صوتك من قبل الإدارة.' }); return; }
-        const newMessage = new Message({ room: room || 'general', senderId: currentUser._id, senderName: currentUser.username, senderRank: currentUser.rank, text: text.trim() });
-        await newMessage.save(); io.to(room).emit('new-message', newMessage);
+        if (!currentUser || currentUser.banned) { 
+            socket.emit('kick-ban', { message: 'أنت محظور' }); 
+            return socket.disconnect(); 
+        }
+        if (currentUser.muted) { 
+            socket.emit('system-alert', { message: '🤐 تم كتم صوتك من قبل الإدارة.' }); 
+            return; 
+        }
+        
+        const newMessage = new Message({ 
+            room: room || 'general', 
+            senderId: currentUser._id, 
+            senderName: currentUser.username, 
+            senderRank: currentUser.rank, 
+            text: text.trim() 
+        });
+        await newMessage.save(); 
+        io.to(room).emit('new-message', newMessage);
     });
 
+    // ميزة الكتم من قبل الإدارة والمشرفين
     socket.on('admin-mute', async ({ targetUserId }) => {
         const adminUser = await User.findById(sessionUser.id);
         const targetUser = await User.findById(targetUserId);
         if (!adminUser || !targetUser) return;
+
         const adminLevel = RANKS[adminUser.rank]?.level || 0;
         const targetLevel = RANKS[targetUser.rank]?.level || 0;
+
+        // التحقق من صلاحيات المشرفين (رتبة مستوى 3 فما فوق) وأن رتبته أعلى من الشخص المستهدف
         if (adminLevel >= 3 && adminLevel > targetLevel) {
-            targetUser.muted = true; await targetUser.save();
-            io.emit('user-status-updated', { userId: targetUserId, muted: true });
-            io.to(socket.currentRoom).emit('new-message', { senderName: '🛡️ النظام', text: `تم كتم المستخدم [ ${targetUser.username} ] بواسطة [ ${adminUser.username} ]`, type: 'system' });
-        } else { socket.emit('system-alert', { message: '❌ لا تملك صلاحيات كافية.' }); }
+            targetUser.muted = true;
+            await targetUser.save();
+            
+            // إرسال تنبيه للنظام في الغرفة العامة أو الغرفة الحالية
+            io.emit('system-alert', { message: `🔇 قام المشرف ${adminUser.username} بكتم صوت ${targetUser.username}.` });
+        } else {
+            socket.emit('system-alert', { message: '❌ لا تملك صلاحيات كافية لتنفيذ هذا الإجراء.' });
+        }
     });
 
-    socket.on('admin-ban', async ({ targetUserId }) => {
+    // ميزة إلغاء الكتم
+    socket.on('admin-unmute', async ({ targetUserId }) => {
         const adminUser = await User.findById(sessionUser.id);
         const targetUser = await User.findById(targetUserId);
         if (!adminUser || !targetUser) return;
-        const adminLevel = RANKS[adminUser.rank]?.level || 0;
-        const targetLevel = RANKS[targetUser.rank]?.level || 0;
-        if (adminLevel >= 3 && adminLevel > targetLevel) {
-            targetUser.banned = true; targetUser.status = '🔴 غير متصل'; await targetUser.save();
-            io.emit('kick-user', { userId: targetUserId, message: 'تم حظرك نهائياً!' });
-            io.to(socket.currentRoom).emit('new-message', { senderName: '🛡️ النظام', text: `🚫 تم حظر وطرد [ ${targetUser.username} ] بواسطة [ ${adminUser.username} ]`, type: 'system' });
-        } else { socket.emit('system-alert', { message: '❌ لا تملك صلاحيات كافية.' }); }
-    });
-});
 
-const PORT = process.env.PORT || 10000;
-server.listen(PORT, '0.0.0.0', () => { console.log(`🚀 Server running on port: ${PORT}`); });
+        const adminLevel = RANKS[adminUser.rank]?.level || 0;
+        if (adminLevel >= 3) {
+            targetUser.muted = false;
+            await targetUser.save();
+            io.emit('system-alert', { message: `🔊 قام المشرف ${adminUser.username} بإلغاء كتم ${targetUser.username}.` });
+        }
+    });
+
+    // ميزة الحظر (Ban) من قبل الإدارة
+    socket.on('admin-ban', async ({ targetUserId }) => {
