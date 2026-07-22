@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>شات اليمن المطور</title>
+
+<link rel="stylesheet" href="css/chat.css">
+
+<link rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap"
+rel="stylesheet">
+
+<script src="/socket.io/socket.io.js"></script>
+
+</head>
+
+<body>
+
+<!-- ========================= -->
+<!-- الشريط العلوي -->
+<!-- ========================= -->
+
+<header class="topbar">
+
+<div class="logo">
+
+💬 شات اليمن المطور
+
+</div>
+
+<div class="top-actions">
+
+<button id="profileBtn">👤</button>
+
+<button id="notifyBtn">📭</button>
+
+<button id="likesBtn">❤️</button>
+
+<button id="inviteBtn">➕</button>
+
+<button id="privateBtn">✉️</button>
+
+<button id="storeBtn">🛒</button>
+
+<button id="menuBtn">☰</button>
+
+</div>
+
+</header>
+
+<!-- ========================= -->
+<!-- الرسائل -->
+<!-- ========================= -->
+
+<main id="messages" class="messages">
+
+<!-- الرسائل ستضاف هنا بواسطة chat.js -->
+
+</main>
+
+<!-- ========================= -->
+<!-- رسائل النظام -->
+<!-- ========================= -->
+
+<div id="systemMessage" class="system-message" style="display:none;"></div>
+
+<!-- ========================= -->
+<!-- شريط الكتابة -->
+<!-- ========================= -->
+
+<footer class="chat-input">
+
+<button id="uploadBtn">➕</button>
+
+<button id="emojiBtn">😊</button>
+
+<input
+id="messageInput"
+type="text"
+placeholder="اكتب هنا...">
+
+<button id="voiceBtn">🎤</button>
+
+<button id="sendBtn">➤</button>
+
+</footer>
+
+<!-- ========================= -->
+<!-- الشريط السفلي -->
+<!-- ========================= -->
+
+<nav class="bottom-bar">
+
+<button id="usersBtn">
+
+👥
+
+<span>المتواجدون</span>
+
+</button>
+
+<button id="homeBtn">
+
+🏠
+
+<span>الرئيسية</span>
+
+</button>
+
+<button id="settingsBtn">
+
+⚙️
+
+<span>الإعدادات</span>
+
+</button>
+
+<button id="roomsBtn">
+
+🌎
+
+<span>الغرف</span>
+
+</button>
+
+<button id="soundBtn">
+
+🔊
+
+<span>الصوت</span>
+
+</button>
+
+<button id="radioBtn">
+
+▶️
+
+<span>الراديو</span>
+
+</button>
+
+</nav>
+
+<!-- ========================= -->
+<!-- النوافذ المنبثقة -->
+<!-- ========================= -->
+
+<div id="profileModal" class="modal"></div>
+
+<div id="notificationsModal" class="modal"></div>
+
+<div id="friendsModal" class="modal"></div>
+
+<div id="usersModal" class="modal"></div>
+
+<div id="emojiModal" class="modal"></div>
+
+<div id="storeModal" class="modal"></div>
+
+<div id="roomsModal" class="modal"></div>
+
+<div id="privateModal" class="modal"></div>
+
+<div id="settingsModal" class="modal"></div>
+
+<script src="js/chat.js"></script>
+
+</body>
+
+</html>
