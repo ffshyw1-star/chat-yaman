@@ -1,4 +1,4 @@
-// server.js - النسخة الكاملة والصحيحة
+
 const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
@@ -41,10 +41,11 @@ let rooms = [
 let reports = [];
 let friendRequests = [];
 
+// تعريف الرتب - بدون أخطاء
 const RANKS = {
     visitor: { name: 'زائر', level: 0, color: '#888' },
     member: { name: 'عضو', level: 1, color: '#2196F3' },
-    premium: { name: '💎 مميز', level: 2,: '#FF9800' },
+    premium: { name: '💎 مميز', level: 2, color: '#FF9800' },
     supervisor: { name: '🛡️ مشرف', level: 3, color: '#4CAF50' },
     admin: { name: '☆ إدارة', level: 4, color: '#E91E63' },
     superadmin: { name: '⭐ ادمن', level: 5, color: '#9C27B0' },
@@ -102,7 +103,7 @@ app.post('/api/login', async (req, res) => {
         return res.json({ success: false, message: 'اسم المستخدم غير موجود' });
     }
     if (!user.password) {
-        return res.json({ success: false, message: 'هذا حساب زائر، لا يمكن تسجيل الدخول به' });
+        return res.json({ success: false, message: 'حساب زائر، لا يمكن تسجيل الدخول به' });
     }
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
@@ -112,7 +113,7 @@ app.post('/api/login', async (req, res) => {
         return res.json({ success: false, message: 'حسابك محظور' });
     }
     user.status = '🟢 متصل';
-    user.lastSe = new Date().toISOString();
+    user.lastSeen = new Date().toISOString();
     req.session.user = user;
     res.json({ success: true, user });
 });
@@ -124,4 +125,99 @@ app.post('/api/guest', (req, res) => {
         username: 'زائر_' + Math.floor(Math.random() * 10000),
         rank: 'visitor',
         photo: '/default-avatar.png',
-        status: '🟢 مت
+        status: '🟢 متصل',
+        privacy: 'all',
+        banned: false,
+        balance: 0,
+        lastSeen: new Date().toISOString()
+    };
+    users.push(guest);
+    req.session.user = guest;
+    res.json({ success: true, user: guest });
+});
+
+// تسجيل الخروج
+app.post('/api/logout', (req, res) => {
+    if (req.session.user) {
+        const user = users.find(u => u.id === req.session.user.id);
+        if (user) {
+            user.status = '🔴 غير متصل';
+            user.lastSeen = new Date().toISOString();
+        }
+    }
+    req.session.destroy();
+    res.redirect('/');
+});
+
+// التحقق من الجلسة
+app.get('/api/session', (req, res) => {
+    if (req.session.user) {
+        const user = users.find(u => u.id === req.session.user.id);
+        if (user) {
+            return res.json({ success: true, user });
+        }
+    }
+    res.json({ success: false, user: null });
+});
+
+// الحصول على قائمة الغرف
+app.get('/api/rooms', (req, res) => {
+    res.json({ success: true, rooms });
+});
+
+// الحصول على قائمة المستخدمين المتصلين
+app.get('/api/users', (req, res) => {
+    const onlineUsers = users.filter(u => u.status === '🟢 متصل');
+    res.json({ success: true, users: onlineUsers });
+});
+
+// ====================== Socket.io (الدردشة الحية) ======================
+io.on('connection', (socket) => {
+    console.log('مستخدم متصل:', socket.id);
+    
+    const user = socket.handshake.session.user;
+    if (!user) {
+        socket.disconnect();
+        return;
+    }
+
+    // انضمام إلى غرفة
+    socket.on('join-room', (roomId) => {
+        socket.join(roomId);
+        socket.currentRoom = roomId;
+        console.log(`${user.username} انضم إلى ${roomId}`);
+        
+        // إرسال آخر 50 رسالة
+        const roomMessages = messages
+            .filter(m => m.room === roomId)
+            .slice(-50);
+        socket.emit('load-messages', roomMessages);
+        
+        // إعلام المستخدمين الآخرين
+        socket.to(roomId).emit('user-joined', {
+            id: user.id,
+            username: user.username,
+            rank: user.rank
+        });
+    });
+
+    // إرسال رسالة
+    socket.on('send-message', (data) => {
+        const { room, text } = data;
+        if (!text || !text.trim()) return;
+        
+        const message = {
+            id: uuidv4(),
+            room: room || 'general',
+            senderId: user.id,
+            senderName: user.username,
+            senderRank: user.rank,
+            text: text.trim(),
+            type: 'text',
+            timestamp: new Date().toISOString(),
+            deleted: false,
+            reported: false
+        };
+        
+        messages.push(message);
+        io.to(room).emit('new-message', message
