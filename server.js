@@ -1,6 +1,8 @@
+require('dotenv').config(); // تفعيل قراءة متغيرات البيئة
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const mongoose = require('mongoose');
 const path = require('path');
 
 const app = express();
@@ -9,24 +11,29 @@ const io = new Server(server, {
     cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-// تشغيل المجلد العام للموقع
+// إعدادات قراءة البيانات والملفات الثابتة
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ربط اتصالات Socket.io لشات اليمن المطور
+// الاتصال بقاعدة بيانات MongoDB Atlas بشكل آمن
+const mongoURI = process.env.MONGO_URI || "mongodb+srv://admin:admin@cluster0.ywgsrhl.mongodb.net/yemen_chat_db?retryWrites=true&w=majority&appName=Cluster0";
+
+mongoose.connect(mongoURI)
+    .then(() => console.log('🟢 تم الاتصال بنجاح بقاعدة بيانات شات اليمن المطور!'))
+    .catch(err => console.error('🔴 خطأ أثناء الاتصال بقاعدة البيانات:', err));
+
+// ربط اتصالات Socket.io مع واجهات المستخدم
 io.on('connection', (socket) => {
     let currentRoom = '';
     let currentUser = '';
 
-    // 1. استقبال حدث الانضمام (يجب أن يطابق كود المتصفح لديك)
     socket.on('join', (data) => {
         if (!data || !data.name || !data.room) return;
-        
         currentRoom = data.room;
         currentUser = data.name;
-        
         socket.join(currentRoom);
         
-        // بث رسالة ترحيبية داخل الغرفة
         io.to(currentRoom).emit('msg', {
             user: 'نظام الشات 👑',
             text: `🟢 انضم المطور [ ${currentUser} ] إلى الغرفة الآن.`,
@@ -34,10 +41,8 @@ io.on('connection', (socket) => {
         });
     });
 
-    // 2. استقبال الرسائل النصية وإعادة بثها تلقائياً
     socket.on('message', (data) => {
         if (!data || !data.text) return;
-        
         io.to(currentRoom).emit('msg', {
             user: currentUser || 'زائر',
             text: data.text,
@@ -45,7 +50,6 @@ io.on('connection', (socket) => {
         });
     });
 
-    // 3. عند مغادرة المستخدم
     socket.on('disconnect', () => {
         if (currentRoom && currentUser) {
             io.to(currentRoom).emit('msg', {
@@ -57,8 +61,8 @@ io.on('connection', (socket) => {
     });
 });
 
-// تشغيل السيرفر على المنفذ المخصص من Render
+// تشغيل الخادم على المنفذ المخصص
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`سيرفر شات اليمن المطور يعمل بنجاح على المنفذ: ${PORT}`);
+    console.log(`🚀 السيرفر يعمل بنجاح على المنفذ: ${PORT}`);
 });
