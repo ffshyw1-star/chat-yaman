@@ -3,9 +3,13 @@
   "version": "1.0.0",
   "description": "شات اليمن المطور",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=20.0.0 <23.0.0"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
