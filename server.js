@@ -13,7 +13,6 @@ const io = new Server(server, {
     cors: { origin: "*", methods: ["GET", "POST"] }
 });
 
-// إعدادات قراءة البيانات القادمة من نماذج الـ HTML (Form Data)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -38,68 +37,93 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
+// تعريف مخطط وموديل الرسائل لحفظ المحادثات
+const messageSchema = new mongoose.Schema({
+    room: { type: String, required: true },
+    user: { type: String, required: true },
+    text: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now }
+});
+const Message = mongoose.model('Message', messageSchema);
+
 /* ===== مسارات الصفحات والتوجيه (Routes) ===== */
 
-// المسار الرئيسي فتح صفحة index.html المباشرة تلقائياً
 app.get('/', (req, res) => {
     res.sendFile(path.join(finalPublicPath, 'index.html'));
 });
 
-// مسار معالجة إنشاء حساب جديد من صفحة register.html
+// تحويل تلقائي للمسارات الفرعية لمنع خطأ الـ Cannot GET
+const htmlFiles = ['guest.html', 'login.html', 'register.html', 'rooms.html', 'chat.html', 'admin.html'];
+htmlFiles.forEach(file => {
+    app.get(`/pages/${file}`, (req, res) => {
+        res.sendFile(path.join(finalPublicPath, file));
+    });
+});
+
+// مسار معالجة إنشاء حساب جديد
 app.post('/register', async (req, res) => {
     try {
         const { username, password } = req.body;
         if (!username || !password) {
             return res.send('<script>alert("الرجاء ملء جميع الحقول"); window.history.back();</script>');
         }
-        
         const userExists = await User.findOne({ username });
         if (userExists) {
             return res.send('<script>alert("اسم المستخدم مسجل مسبقاً"); window.history.back();</script>');
         }
-
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ username, password: hashedPassword });
         await newUser.save();
-
-        res.send('<script>alert("تم إنشاء الحساب بنجاح!"); window.location.href = "/login.html";</script>');
+        res.send('<script>alert("تم إنشاء الحساب بنجاح!"); window.location.href = "/pages/login.html";</script>');
     } catch (err) {
         res.status(500).send("خطأ في السيرفر أثناء التسجيل");
     }
 });
 
-// مسار معالجة تسجيل الدخول من صفحة login.html
+// مسار معالجة تسجيل الدخول
 app.post('/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         const user = await User.findOne({ username });
-        
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.send('<script>alert("اسم المستخدم أو كلمة المرور غير صحيحة"); window.history.back();</script>');
         }
-
-        // التوجيه لصفحة الغرف مباشرة بعد نجاح تسجيل الدخول
         res.send(`<script>
             localStorage.setItem("chat_username", "${username}");
-            window.location.href = "/rooms.html";
+            window.location.href = "/pages/rooms.html";
         </script>`);
     } catch (err) {
         res.status(500).send("خطأ في السيرفر أثناء تسجيل الدخول");
     }
 });
 
-
 /* ===== إدارة اتصالات شات اليمن المطور (Socket.io) ===== */
 io.on('connection', (socket) => {
     let currentRoom = '';
     let currentUser = '';
 
-    socket.on('join', (data) => {
+    // عند دخول مستخدم إلى غرفة محددة
+    socket.on('join', async (data) => {
         if (!data || !data.name || !data.room) return;
         currentRoom = data.room;
         currentUser = data.name;
         socket.join(currentRoom);
         
+        // استرجاع المحادثات القديمة المحفوظة في قاعدة البيانات لهذه الغرفة وبثها للمستخدم الجديد فقط
+        try {
+            const oldMessages = await Message.find({ room: currentRoom }).sort({ timestamp: 1 }).limit(50);
+            oldMessages.forEach(msg => {
+                socket.emit('msg', {
+                    user: msg.user,
+                    text: msg.text,
+                    time: msg.timestamp.toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' })
+                });
+            });
+        } catch (err) {
+            console.error('خطأ أثناء جلب الرسائل القديمة:', err);
+        }
+
+        // بث رسالة انضمام للغرفة
         io.to(currentRoom).emit('msg', {
             user: 'نظام الشات 👑',
             text: `🟢 انضم المطور [ ${currentUser} ] إلى الغرفة الآن.`,
@@ -107,12 +131,29 @@ io.on('connection', (socket) => {
         });
     });
 
-    socket.on('message', (data) => {
+    // عند إرسال رسالة جديدة
+    socket.on('message', async (data) => {
         if (!data || !data.text) return;
+        
+        const timeString = new Date().toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' });
+
+        // حفظ الرسالة فوراً في الـ Database
+        try {
+            const newMessage = new Message({
+                room: currentRoom,
+                user: currentUser || 'زائر',
+                text: data.text
+            });
+            await newMessage.save();
+        } catch (err) {
+            console.error('خطأ أثناء حفظ الرسالة:', err);
+        }
+
+        // بث الرسالة لجميع المتواجدين في نفس الغرفة
         io.to(currentRoom).emit('msg', {
             user: currentUser || 'زائر',
             text: data.text,
-            time: new Date().toLocaleTimeString('ar-YE', { hour: '2-digit', minute: '2-digit' })
+            time: timeString
         });
     });
 
