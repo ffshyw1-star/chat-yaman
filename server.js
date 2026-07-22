@@ -1,262 +1,134 @@
-/**
- * ============================================================
- *  خادم شات اليمن المطور — WebSocket Live Chat
- *  Node.js (CommonJS) + مكتبة ws
- * ============================================================
- */
-'use strict';
 
+const express = require('express');
 const http = require('http');
-const fs = require('fs');
+const socketIo = require('socket.io');
 const path = require('path');
-const crypto = require('crypto');
-const { URL } = require('url');
-const { WebSocketServer } = require('ws');
+const session = require('express-session');
+const sharedSession = require('express-socket.io-session');
+const bcrypt = require('bcrypt');
+const fs = require('fs');
+const multer = require('multer');
+const { v4: uuidv4 } = require('uuid');
 
-// ===== الإعدادات =====
-const PORT = process.env.PORT || 10000;
-const HOST = '0.0.0.0';
-const ROOMS = ['global', 'yemen', 'algeria', 'egypt', 'saudi', 'morocco'];
-const ROOM_LABELS = {
-  global: '🌎 غرفة العامة',
-  yemen: '🇾🇪 غرفة اليمن',
-  algeria: '🇩🇿 غرفة الجزائر',
-  egypt: '🇪🇬 غرفة مصر',
-  saudi: '🇸🇦 غرفة السعودية',
-  morocco: '🇲🇦 غرفة المغرب'
-};
-const MAX_HISTORY = 50;
-const RATE_WINDOW_MS = 30_000;
-const RATE_MAX = 20;
-const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
-const VALID_ROLES = ['guest', 'member', 'vip', 'mod', 'admin', 'super', 'owner'];
-
-// ===== حالة في الذاكرة =====
-const roomHistory = new Map();
-const onlineUsers = new Map();
-const sessions = new Map();
-
-ROOMS.forEach(r => {
-  roomHistory.set(r, []);
-  onlineUsers.set(r, new Map());
+// إعدادات Multer لرفع الملفات
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'public/uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
 });
+const upload = multer({ storage });
 
-setInterval(() => {
-  const now = Date.now();
-  for (const [token, s] of sessions) {
-    if (now - s.createdAt > SESSION_TTL_MS) sessions.delete(token);
-  }
-}, 60 * 60 * 1000);
+// قواعد البيانات المؤقتة (للاستخدام البسيط، للديمو)
+// للمشروع الحقيقي استخدم MongoDB أو PostgreSQL
+let users = []; // { id, username, password, email, rank, photo, cover, country, gender, age, bio, status, friends, likes, privacy, muted, banned, ip }
+let messages = []; // { id, room, sender, text, type, timestamp, deleted, reported }
+let rooms = [
+    { id: 'general', name: '🌎 غرفة العامة', icon: '🌎', description: 'الغرفة العامة للجميع' },
+    { id: 'yemen', name: '🇾🇪 غرفة اليمن', icon: '🇾🇪', description: 'غرفة اليمن' },
+    { id: 'algeria', name: '🇩🇿 غرفة الجزائر', icon: '🇩🇿', description: 'غرفة الجزائر' },
+    { id: 'egypt', name: '🇪🇬 غرفة مصر', icon: '🇪🇬', description: 'غرفة مصر' }
+];
+let reports = [];
+let news = [];
+let friendRequests = [];
+let likes = [];
 
-// ===== أدوات أساسية =====
-function createSession({ name, role, country }) {
-  const token = crypto.randomBytes(20).toString('hex');
-  sessions.set(token, {
-    userId: crypto.randomBytes(4).toString('hex'),
-    name: String(name || 'زائر').slice(0, 30).trim() || 'زائر',
-    role: VALID_ROLES.includes(role) ? role : 'member',
-    country: String(country || '🇾🇪').slice(0, 8),
-    createdAt: Date.now()
-  });
-  return token;
-}
-
-function sanitize(str) {
-  if (typeof str !== 'string') return '';
-  return str.slice(0, 500)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/`/g, '&#96;');
-}
-
-function sendTo(ws, type, payload) {
-  if (ws.readyState === 1) {
-    try { ws.send(JSON.stringify({ type, payload, ts: Date.now() })); } catch (e) {}
-  }
-}
-
-function broadcast(room, type, payload, exceptUserId = null) {
-  const users = onlineUsers.get(room);
-  if (!users) return;
-  const data = JSON.stringify({ type, room, payload, ts: Date.now() });
-  for (const [id, info] of users) {
-    if (id !== exceptUserId && info.ws.readyState === 1) {
-      try { info.ws.send(data); } catch (e) {}
-    }
-  }
-}
-
-function getOnlineList(room) {
-  const users = onlineUsers.get(room);
-  if (!users) return [];
-  return Array.from(users.values()).map(u => ({
-    userId: u.userId, name: u.name, role: u.role, country: u.country
-  }));
-}
-
-function addToHistory(room, message) {
-  const history = roomHistory.get(room);
-  if (!history) return;
-  history.push(message);
-  if (history.length > MAX_HISTORY) history.shift();
-}
-
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type'
+// رتب المستخدمين
+const RANKS = {
+    visitor: { name: 'زائر', level: 0 },
+    member: { name: 'عضو', level: 1 },
+    premium: { name: '💎 مميز', level: 2 },
+    supervisor: { name: '🛡️ مشرف', level: 3 },
+    admin: { name: '☆ إدارة', level: 4 },
+    superadmin: { name: '⭐ ادمن', level: 5 },
+    owner: { name: '👑 المالك', level: 6 }
 };
 
-// ===== خادم HTTP =====
-const server = http.createServer((req, res) => {
-  const parsed = new URL(req.url, `http://${req.headers.host}`);
+// إعداد Express
+const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 
-  if (req.method === 'OPTIONS') {
-    res.writeHead(204, CORS); return res.end();
-  }
+// إعداد الجلسات
+const sessionMiddleware = session({
+    secret: 'yemen-chat-secret-key',
+    resave: true,
+    saveUninitialized: true
+});
+app.use(sessionMiddleware);
+io.use(sharedSession(sessionMiddleware, { autoSave: true }));
 
-  if (req.method === 'POST' && parsed.pathname === '/api/login') {
-    let body = '';
-    req.on('data', chunk => {
-      body += chunk;
-      if (body.length > 2048) {
-        req.destroy(); res.writeHead(413, CORS); res.end('Too large');
-      }
-    });
-    req.on('end', () => {
-      try {
-        const data = JSON.parse(body || '{}');
-        const token = createSession({ name: data.name, role: data.role, country: data.country });
-        const s = sessions.get(token);
-        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', ...CORS });
-        res.end(JSON.stringify({
-          ok: true, token, userId: s.userId, name: s.name, role: s.role, country: s.country, rooms: ROOMS, labels: ROOM_LABELS
-        }));
-      } catch (e) {
-        res.writeHead(400, CORS); res.end(JSON.stringify({ ok: false, error: 'bad_json' }));
-      }
-    });
-    return;
-  }
+// ملفات ثابتة
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-  if (req.method === 'GET' && parsed.pathname === '/api/health') {
-    const stats = {
-      ok: true, uptime: process.uptime(),
-      totalOnline: Array.from(onlineUsers.values()).reduce((sum, m) => sum + m.size, 0),
-      rooms: ROOMS.map(r => ({ id: r, label: ROOM_LABELS[r], online: onlineUsers.get(r).size })),
-      sessions: sessions.size, memory: process.memoryUsage()
+// ==================== API Routes ====================
+
+// تسجيل مستخدم جديد
+app.post('/api/register', async (req, res) => {
+    const { username, password, email } = req.body;
+    if (!username || !password || !email) return res.json({ success: false, message: 'جميع الحقول مطلوبة' });
+    if (users.find(u => u.username === username)) return res.json({ success: false, message: 'اسم المستخدم موجود' });
+    if (users.find(u => u.email === email)) return res.json({ success: false, message: 'البريد الإلكتروني موجود' });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = {
+        id: uuidv4(),
+        username,
+        password: hashedPassword,
+        email,
+        rank: 'member',
+        photo: '/default-avatar.png',
+        cover: '/default-cover.jpg',
+        country: 'اليمن',
+        gender: 'ذكر',
+        age: 20,
+        bio: 'مرحباً، أنا جديد في شات اليمن',
+        status: '🟢 متصل',
+        friends: [],
+        likes: [],
+        privacy: 'all',
+        muted: false,
+        banned: false,
+        ip: req.ip,
+        balance: 0,
+        lastSeen: new Date().toISOString()
     };
-    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', ...CORS });
-    res.end(JSON.stringify(stats)); return;
-  }
-
-  if (req.method === 'GET') {
-    let targetFile = parsed.pathname === '/' ? '/index.html' : parsed.pathname;
-    const filePath = path.join(__dirname, 'public', targetFile);
-    const ext = path.extname(filePath).toLowerCase();
-    
-    const mime = {
-      '.html': 'text/html; charset=utf-8', '.js': 'application/javascript; charset=utf-8',
-      '.css': 'text/css; charset=utf-8', '.png': 'image/png', '.jpg': 'image/jpeg',
-      '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.svg': 'image/svg+xml', '.ico': 'image/x-icon'
-    }[ext] || 'application/octet-stream';
-
-    fs.readFile(filePath, (err, data) => {
-      if (!err) {
-        res.writeHead(200, { 'Content-Type': mime, 'Cache-Control': 'no-cache' });
-        return res.end(data);
-      }
-      if (parsed.pathname === '/' || targetFile === '/index.html' || ext === '.html' || ext === '.js' || ext === '.css') {
-        res.writeHead(404, CORS); return res.end('Not found');
-      }
-    });
-    if (parsed.pathname === '/' || ext === '.html' || ext === '.js' || ext === '.css') return;
-  }
+    users.push(newUser);
+    req.session.user = newUser;
+    res.json({ success: true, user: newUser });
 });
 
-// ===== خادم WebSocket =====
-const wss = new WebSocketServer({ server, maxPayload: 4096 });
-
-wss.on('connection', (ws, req) => {
-  const parsed = new URL(req.url, `http://${req.headers.host}`);
-  const token = parsed.searchParams.get('token');
-  const session = token && sessions.get(token);
-
-  if (!session) {
-    sendTo(ws, 'error', { code: 'AUTH_REQUIRED', message: 'يجب تسجيل الدخول أولاً' });
-    setTimeout(() => ws.close(4001, 'Unauthorized'), 100); return;
-  }
-
-  ws.userId = session.userId;
-  ws.userName = session.name;
-  ws.userRole = session.role;
-  ws.userCountry = session.country;
-  ws.currentRoom = null;
-  ws.rateBuckets = [];
-  ws.isAlive = true;
-
-  sendTo(ws, 'auth_ok', {
-    userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry, rooms: ROOMS, labels: ROOM_LABELS
-  });
-
-  ws.on('pong', () => { ws.isAlive = true; });
-
-  ws.on('message', raw => {
-    if (raw.length > 4096) return sendTo(ws, 'error', { message: 'الرسالة كبيرة جداً' });
-    let msg;
-    try { msg = JSON.parse(raw.toString()); } catch { return sendTo(ws, 'error', { code: 'BAD_JSON', message: 'بيانات غير صالحة' }); }
-    if (!msg || typeof msg.type !== 'string') return sendTo(ws, 'error', { message: 'نوع الرسالة مفقود' });
-    
-    // معالجة الرسائل المستلمة في الـ WebSocket
-    if (msg.type === 'join_room') {
-      const room = ROOMS.includes(msg.room) ? msg.room : 'global';
-      if (ws.currentRoom && onlineUsers.has(ws.currentRoom)) {
-        const prev = onlineUsers.get(ws.currentRoom);
-        if (prev && prev.delete(ws.userId)) {
-          broadcast(ws.currentRoom, 'user_left', { userId: ws.userId, name: ws.userName });
-          broadcast(ws.currentRoom, 'online', { users: getOnlineList(ws.currentRoom), count: prev.size });
-        }
-      }
-      ws.currentRoom = room;
-      const users = onlineUsers.get(room);
-      if (users) {
-        users.set(ws.userId, { ws, userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry });
-        sendTo(ws, 'room_joined', { room, history: roomHistory.get(room) || [], users: getOnlineList(room) });
-        broadcast(room, 'user_joined', { userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry }, ws.userId);
-        broadcast(room, 'online', { users: getOnlineList(room), count: users.size });
-      }
-    } else if (msg.type === 'msg') {
-      if (!ws.currentRoom) return;
-      const text = sanitize(msg.text); if (!text) return;
-      const now = Date.now();
-      ws.rateBuckets = ws.rateBuckets.filter(ts => now - ts < RATE_WINDOW_MS);
-      if (ws.rateBuckets.length >= RATE_MAX) return sendTo(ws, 'error', { message: 'لقد أرسلت رسائل كثيرة جداً، يرجى الانتظار قليلاً' });
-      ws.rateBuckets.push(now);
-
-      const messageItem = { msgId: crypto.randomBytes(6).toString('hex'), userId: ws.userId, name: ws.userName, role: ws.userRole, country: ws.userCountry, text, ts: now };
-      addToHistory(ws.currentRoom, messageItem);
-      broadcast(ws.currentRoom, 'msg', messageItem);
-    }
-  });
-
-  ws.on('close', () => {
-    if (ws.currentRoom && onlineUsers.has(ws.currentRoom)) {
-      const users = onlineUsers.get(ws.currentRoom);
-      if (users && users.delete(ws.userId)) {
-        broadcast(ws.currentRoom, 'user_left', { userId: ws.userId, name: ws.userName });
-        broadcast(ws.currentRoom, 'online', { users: getOnlineList(ws.currentRoom), count: users.size });
-      }
-    }
-  });
+// تسجيل الدخول
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+    const user = users.find(u => u.username === username);
+    if (!user) return res.json({ success: false, message: 'اسم المستخدم غير موجود' });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.json({ success: false, message: 'كلمة المرور خاطئة' });
+    if (user.banned) return res.json({ success: false, message: 'حسابك محظور' });
+    user.status = '🟢 متصل';
+    user.lastSeen = new Date().toISOString();
+    req.session.user = user;
+    res.json({ success: true, user });
 });
 
-// ===== تشغيل الخادم والربط الدقيق والمستقر بنظام Render =====
-server.listen(PORT, HOST, () => {
-  console.log('=========================================');
-  console.log('🇾🇪  خادم شات اليمن المطور يعمل بنجاح');
-  console.log(`📡 جاهز ومستقر على المنفذ: ${PORT}`);
-  console.log('=========================================');
+// الدخول كزائر
+app.post('/api/guest', (req, res) => {
+    const guest = {
+        id: 'guest-' + uuidv4().slice(0, 8),
+        username: 'زائر_' + Math.floor(Math.random() * 10000),
+        rank: 'visitor',
+        photo: '/default-avatar.png',
+        status: '🟢 متصل',
+        privacy: 'all',
+        banned: false,
+        balance: 0
+    };
+    users.push(guest);
+    req.session.user = guest;
+    res.json({ success: true, user: guest });
 });
+
+// تسجيل الخروج
+app.post('/api/logout', (req, res) =>
